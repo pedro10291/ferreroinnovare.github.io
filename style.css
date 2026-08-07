@@ -1,0 +1,1668 @@
+/* ==========================================================================
+   CSS PORTAL DO CLIENTE - Ferrer Innovare Clinic
+   Estilo App Nativo Mobile-First: Claro, Limpo e Luxuoso
+   Paleta: Off-White Quente (#FDFBF7), Nude/Bege (#C8A97E), Marrom Escuro (#3E362E).
+   ========================================================================== */
+
+/* Variáveis de Design */
+:root {
+  --font-title: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Paleta de Cores Estética */
+  --color-bg: #FDFBF7;             /* Fundo Principal - Off-White Quente */
+  --color-surface: #FFFFFF;        /* Fundo de Cards - Branco */
+  --color-surface-hover: #FAF7F2;  
+  --color-gold: #C8A97E;           /* Nude / Bege Elegante */
+  --color-gold-hover: #B8996E;
+  --color-gold-muted: rgba(200, 169, 126, 0.1);
+  --color-text-primary: #3E362E;   /* Texto Principal - Marrom Escuro */
+  --color-text-secondary: #7F7368; /* Texto de Suporte - Marrom Claro */
+  --color-border: #EFEBE5;         /* Bordas finas quentes */
+  
+  /* Cores Funcionais */
+  --color-success: #5F8F75;        /* Verde oliva suave */
+  --color-danger: #C05C5C;         /* Vermelho terracota */
+
+  /* Espaçamentos e Sombras */
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+  --radius-circle: 50%;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-lux: 0 4px 20px rgba(62, 54, 46, 0.04); /* Sombra ultra suave */
+  --shadow-active: 0 8px 30px rgba(200, 169, 126, 0.15); /* Destaque Ouro */
+}
+
+/* Reset Geral */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+input, select, textarea {
+  font-size: 16px !important; /* Previne auto-zoom no iOS */
+  touch-action: manipulation; /* Melhora resposta ao toque */
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   Wrapper Simulação App Nativo (Mobile-first centralizado em telas grandes)
+   ========================================================================== */
+
+.app-wrapper {
+  width: 100%;
+  max-width: 500px; /* Largura padrão de celular */
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 100%;
+  position: relative;
+  box-shadow: 0 0 40px rgba(62, 54, 46, 0.02);
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  padding-bottom: 20px; /* Respiro antes do footer */
+}
+
+/* Header Estilo Premium */
+.app-header {
+  background-color: var(--color-surface);
+  padding: 1.25rem 1.25rem 0.5rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.logo-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-circle);
+  border: 1px solid var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #FFFFFF 0%, #FAF7F2 100%);
+}
+
+.logo-text {
+  font-family: var(--font-title);
+  color: var(--color-gold);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.logo-meta {
+  text-align: left;
+}
+
+.logo-meta h1 {
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.logo-meta p {
+  font-size: 0.65rem;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* Navegação Abas Principais (Agendamento vs Clube VIP) */
+.app-nav-menu {
+  display: flex;
+  background-color: var(--color-bg);
+  padding: 0.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  margin-top: 0.5rem;
+  gap: 0.25rem;
+}
+
+.app-nav-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: var(--transition-smooth);
+}
+
+.app-nav-btn.active {
+  background-color: var(--color-surface);
+  color: var(--color-gold);
+  box-shadow: 0 2px 10px rgba(62, 54, 46, 0.03);
+}
+
+/* Painéis de abas principais */
+.main-tab-panel {
+  display: none;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.main-tab-panel.active {
+  display: flex;
+}
+
+/* ==========================================================================
+   Barra de Progresso (Passos)
+   ========================================================================== */
+
+.progress-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--color-surface);
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+}
+
+/* Linha de fundo conectando passos */
+.progress-container::after {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 2.5rem;
+  right: 2.5rem;
+  height: 2px;
+  background-color: var(--color-border);
+  z-index: 1;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  z-index: 2;
+  position: relative;
+  width: 25%;
+}
+
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.step-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Passo ativo e concluído */
+.progress-step.active .step-num {
+  background-color: var(--color-gold);
+  border-color: var(--color-gold);
+  color: #FFFFFF;
+}
+
+.progress-step.active .step-label {
+  color: var(--color-gold);
+  font-weight: 600;
+}
+
+.progress-step.completed .step-num {
+  background-color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
+   Container de Painéis de Etapas (SPA)
+   ========================================================================== */
+
+.steps-container {
+  flex-grow: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-panel {
+  display: none;
+  flex-direction: column;
+}
+
+.step-panel.active {
+  display: flex;
+  animation: slide-in-next 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.step-header {
+  margin-bottom: 1.5rem;
+}
+
+.step-header.text-center {
+  text-align: center;
+}
+
+.step-header h2 {
+  font-size: 1.35rem;
+  color: var(--color-text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.step-header p {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================================================
+   Etapa 1: Catálogo de Serviços
+   ========================================================================== */
+
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.patient-service-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-lux);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: var(--transition-smooth);
+}
+
+.patient-service-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-gold);
+}
+
+.service-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.service-name {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.service-price {
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-gold);
+}
+
+.service-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.btn-book-service {
+  margin-top: 0.5rem;
+}
+
+/* ==========================================================================
+   Etapa 2: Seletores de Profissional e Data/Hora
+   ========================================================================== */
+
+.booking-section {
+  margin-bottom: 1.5rem;
+}
+
+.booking-section h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+/* Grid de seleção do Profissional */
+.professionals-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.prof-option-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  box-shadow: var(--shadow-lux);
+  transition: var(--transition-smooth);
+}
+
+.prof-option-card .avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: var(--transition-smooth);
+}
+
+.prof-option-card h4 {
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.prof-option-card .prof-specialty {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-top: -4px;
+  line-height: 1.25;
+}
+
+/* Badges recomendada e indisponível */
+.badge-recommended {
+  background-color: rgba(200, 169, 126, 0.1);
+  color: var(--color-gold-hover);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.badge-unavailable {
+  background-color: rgba(62, 54, 46, 0.04);
+  color: var(--color-text-muted);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+/* Seleção do Profissional (Estado Ativo) */
+.prof-option-card.active {
+  border-color: var(--color-gold);
+  background-color: var(--color-gold-muted);
+  box-shadow: var(--shadow-active);
+}
+
+.prof-option-card.active .avatar {
+  background-color: var(--color-gold);
+  color: #FFFFFF;
+  border-color: var(--color-gold);
+}
+
+/* Cartão desabilitado */
+.prof-option-card.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+  border-color: var(--color-border);
+}
+
+/* Input Data Refinado */
+.date-input-wrapper input[type="date"] {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+  transition: var(--transition-smooth);
+}
+
+.date-input-wrapper input[type="date"]:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(200, 169, 126, 0.12);
+}
+
+/* Grid de Slots de Horário */
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+}
+
+.time-slot {
+  background-color: var(--color-surface);
+  border: 1px solid rgba(200, 169, 126, 0.4);
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.time-slot:hover {
+  border-color: #C8A97E;
+}
+
+.time-slot.active,
+.time-slot.selected {
+  background-color: #C8A97E;
+  border-color: #C8A97E;
+  color: #FFFFFF;
+  box-shadow: 0 4px 15px rgba(200, 169, 126, 0.25);
+}
+
+.select-prompt {
+  grid-column: span 4;
+  text-align: center;
+  padding: 1rem 0;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Etapa 3: Ficha de Cadastro e Anamnese
+   ========================================================================== */
+
+.patient-form {
+  width: 90%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.patient-form .form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-family: var(--font-title);
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  color: rgba(62, 54, 46, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(200, 169, 126, 0.4);
+  border-radius: 10px;
+  background-color: rgba(253, 251, 247, 0.8);
+  color: var(--color-text-primary);
+  outline: none;
+  font-size: 0.9rem;
+  transition: var(--transition-smooth);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #C8A97E;
+  background-color: var(--color-surface);
+  box-shadow: 0 0 0 3px rgba(200, 169, 126, 0.2);
+}
+
+.form-fieldset {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1rem 0.5rem 1rem;
+  margin-top: 1.5rem;
+  background-color: var(--color-bg);
+}
+
+.form-fieldset legend {
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  color: var(--color-gold);
+  font-weight: 600;
+  padding: 0 0.5rem;
+}
+
+/* ==========================================================================
+   Toggle Anamnese Sim/Não
+   ========================================================================== */
+.toggle-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 0.25rem;
+}
+
+.btn-toggle {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  font-family: var(--font-title);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-toggle.active {
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  color: #FFFFFF;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group.invalid input {
+  border-color: var(--color-danger);
+}
+
+.error-message {
+  display: none;
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.form-group.invalid .error-message {
+  display: block;
+}
+
+/* ==========================================================================
+   Etapa 4: Resumo do Agendamento (Valores e Política de Sinal)
+   ========================================================================== */
+
+.summary-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-lux);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-item {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.summary-item p {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* Visualização no resumo */
+.service-summary {
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.summary-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-gold-muted);
+  color: var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-details h3 {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+}
+
+.summary-prof-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.summary-prof-badge .avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-gold);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.summary-prof-badge strong {
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.summary-datetime strong {
+  color: var(--color-gold-hover);
+  font-size: 1.05rem;
+}
+
+/* Detalhes de Pagamento do Sinal */
+.payment-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.price-total {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.deposit-row {
+  border-top: 1px dashed var(--color-border);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.price-deposit {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-gold-hover);
+}
+
+/* Box da Política de Sinal (Checkbox Destaque) */
+.policy-agreement-box {
+  background-color: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-left: 3.5px solid var(--color-gold);
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  margin-top: 0.75rem;
+}
+
+.policy-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: pointer;
+}
+
+.policy-checkbox-label input[type="checkbox"] {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-gold);
+}
+
+.policy-text {
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Etapa 5: Sucesso Luxo com Instruções PIX
+   ========================================================================== */
+
+.success-panel {
+  text-align: center;
+  align-items: center;
+  padding: 2.5rem 1rem;
+}
+
+.success-icon-area {
+  margin-bottom: 1.5rem;
+}
+
+.success-glow {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-circle);
+  background-color: rgba(95, 143, 117, 0.1);
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--color-success);
+  box-shadow: 0 0 30px rgba(95, 143, 117, 0.2);
+}
+
+.success-panel h2 {
+  font-family: var(--font-title);
+  font-size: 1.65rem;
+  color: var(--color-text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.success-message {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1.5rem;
+  max-width: 340px;
+}
+
+/* Box de Pagamento do Sinal (Estética Luxo CNPJ PIX) */
+.pix-payment-box {
+  background-color: var(--color-surface);
+  border: 1.5px dashed var(--color-gold);
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-lux);
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pix-header {
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.4rem;
+}
+
+.pix-amount-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pix-amount-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.pix-amount-val {
+  font-size: 1.25rem;
+  color: var(--color-gold-hover);
+  font-weight: 700;
+}
+
+.pix-key-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pix-key-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pix-key-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+}
+
+.pix-key-wrapper code {
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.pix-footer-notes {
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+}
+
+.success-details-box {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-lux);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* ==========================================================================
+   ABA 2: CLUBE VIP E ROLETA
+   ========================================================================== */
+
+.vip-container {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  flex-grow: 1;
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Estilos da Roleta Física */
+.roulette-section {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.wheel-outer-wrapper {
+  position: relative;
+  width: 310px;
+  height: 310px;
+}
+
+/* Pointer superior (Flecha Ouro) */
+.wheel-pointer {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 25px solid var(--color-gold);
+  filter: drop-shadow(0 2px 5px rgba(62, 54, 46, 0.2));
+}
+
+/* Rotação lenta de desejo */
+.wheel-container {
+  width: 300px;
+  height: 300px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-surface);
+  box-shadow: 0 10px 30px rgba(62, 54, 46, 0.15);
+  border: none;
+  overflow: hidden;
+  margin: 0 auto;
+  position: relative;
+}
+
+.wheel-container canvas {
+  display: block;
+}
+
+.wheel-container.rotate-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* Overlay de Cadeado (Cadeado translúcido) */
+.wheel-lock-overlay {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 312px;
+  height: 312px;
+  border-radius: var(--radius-circle);
+  background-color: rgba(253, 251, 247, 0.85); /* Fundo Off-White translúcido */
+  backdrop-filter: blur(4px);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.wheel-lock-overlay.unlocked {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+}
+
+.lock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lock-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 4px 10px rgba(200, 169, 126, 0.3));
+  animation: lock-bob 2s infinite ease-in-out;
+}
+
+.lock-card h4 {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.lock-card p {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  max-width: 200px;
+  line-height: 1.35;
+}
+
+/* Área de Tutorial e Ações */
+.vip-actions-box {
+  width: 100%;
+}
+
+.vip-tutorial-text {
+  text-align: left;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg);
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--color-border);
+}
+
+/* ==========================================================================
+   Botoes Globais e Ações
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  min-height: 48px; /* Target de toque excelente */
+  transition: var(--transition-smooth);
+}
+
+.btn-primary {
+  background-color: var(--color-gold);
+  color: #FFFFFF;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-gold-hover);
+  box-shadow: var(--shadow-gold);
+}
+
+.btn-primary:disabled {
+  background-color: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-gold-muted);
+}
+
+.btn-confirm-booking {
+  background-color: var(--color-text-primary);
+  color: #FFFFFF;
+}
+
+.btn-confirm-booking:hover {
+  background-color: #121212;
+}
+
+.btn-small {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  min-height: 32px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.step-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 2rem;
+}
+
+.step-actions button {
+  flex: 1;
+}
+
+/* ==========================================================================
+   Contêiner de Toasts e Feedback
+   ========================================================================== */
+
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  left: 5%;
+  right: 5%;
+  width: 90%;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-gold);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.25rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 15px rgba(62, 54, 46, 0.08);
+  animation: toast-slide-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Keyframes Animações
+   ========================================================================== */
+
+@keyframes slide-in-next {
+  from {
+    opacity: 0;
+    transform: translate3d(25px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lock-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Ajustes Responsividade */
+@media(min-width: 501px) {
+  body {
+    padding: 2rem 0 0 0;
+  }
+  
+  .app-wrapper {
+    border-radius: var(--radius-lg);
+    max-width: 960px; /* Alargado para acomodar a vitrine de 2 colunas */
+    width: 95%;
+    height: auto;
+    min-height: auto;
+    box-shadow: 0 10px 40px rgba(62, 54, 46, 0.06);
+  }
+
+  .toast-container {
+    left: auto;
+    right: 2rem;
+    width: 320px;
+  }
+}
+
+/* ==========================================================================
+   ESTILOS VITRINE CLEAN (PASSO 0)
+   ========================================================================== */
+
+.vitrine-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 0.5rem 0;
+}
+
+.vitrine-visual {
+  width: 100%;
+}
+
+.carousel-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lux);
+  background-color: var(--color-surface);
+}
+
+.carousel-slides {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.carousel-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.carousel-img.active {
+  opacity: 1;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 5;
+}
+
+.carousel-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle);
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.carousel-dots .dot.active {
+  background-color: #FFFFFF;
+  width: 18px;
+  border-radius: 4px;
+}
+
+/* Infos da Vitrine */
+.vitrine-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  text-align: center;
+  padding: 0 0.5rem;
+  align-items: center;
+}
+
+.brand-subtitle {
+  font-family: var(--font-title);
+  color: var(--color-gold);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 500;
+}
+
+.brand-title {
+  font-family: var(--font-title);
+  color: var(--color-text-primary);
+  font-size: 1.75rem;
+  font-weight: 300; /* Regular / Light */
+  line-height: 1.3;
+}
+
+.brand-description {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 440px;
+}
+
+.expertise-text {
+  font-size: 0.75rem;
+  color: var(--color-gold-hover);
+  font-style: italic;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.btn-cta {
+  background-color: var(--color-gold);
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.95rem 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 15px rgba(200, 169, 126, 0.2);
+  transition: var(--transition-smooth);
+  width: 100%;
+}
+
+.btn-cta:hover {
+  background-color: var(--color-gold-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(200, 169, 126, 0.35);
+}
+
+.vitrine-footer {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  width: 100%;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1.25rem;
+}
+
+.sutil-link, .sutil-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+}
+
+.sutil-link:hover {
+  color: var(--color-gold);
+}
+
+.sutil-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-gold);
+}
+
+/* Responsividade Desktop para Vitrine de Duas Colunas */
+@media(min-width: 768px) {
+  .vitrine-container {
+    flex-direction: row;
+    align-items: center;
+    gap: 2.5rem;
+    padding: 1.5rem;
+  }
+
+  .vitrine-visual {
+    flex: 1.22; /* Ocupa cerca de 55% da largura do card */
+  }
+
+  .vitrine-info {
+    flex: 1; /* Ocupa cerca de 45% da largura do card */
+    text-align: left;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .brand-title {
+    font-size: 2.1rem;
+  }
+
+  .carousel-container {
+    height: 480px; /* Mais imponente e alta */
+    aspect-ratio: auto;
+    border-radius: 12px;
+  }
+
+  .carousel-img {
+    border-radius: 12px;
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    object-fit: cover;
+  }
+  
+  .btn-cta {
+    width: auto;
+    padding: 0.95rem 2.5rem;
+  }
+
+  .vitrine-footer {
+    justify-content: flex-start;
+  }
+}
+
+/* Footer de Direitos Autorais (Empurrado ao fundo via Flexbox) */
+.app-footer {
+  width: 100%;
+  text-align: center;
+  margin-top: auto; /* Empurra o footer para o fundo natural da página */
+  padding-bottom: env(safe-area-inset-bottom, 0); /* Safe-area para iPhones com notch */
+}
+
+.footer-admin-link {
+  display: block;
+  padding: 15px 15px 20px 15px;
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: rgba(62, 54, 46, 0.55);
+  text-decoration: none;
+  cursor: default;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
+
+.footer-admin-link:hover {
+  color: rgba(62, 54, 46, 0.75);
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE MOBILE — FLUID LAYOUT (max-width: 768px)
+   Garante que todos os elementos se adaptem a telas pequenas sem quebrar.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+
+  /* ---- Container Fluido ---- */
+  .app-wrapper {
+    width: 95%;
+    max-width: 100%;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+  }
+
+  /* ---- Padding-top no conteúdo para evitar sobreposição de headers ---- */
+  .steps-container {
+    padding: 1rem;
+    padding-top: 1.25rem;
+  }
+
+  /* ---- Imagem Principal: Full-Width com Altura Fixa ---- */
+  .carousel-container {
+    width: 100%;
+    height: 300px;
+    aspect-ratio: auto;
+    border-radius: 12px;
+  }
+
+  .carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---- Redução de 20% nas Fontes de Títulos ---- */
+  .brand-title {
+    font-size: 1.4rem;  /* 1.75rem × 0.8 */
+  }
+
+  .step-header h2 {
+    font-size: 1.08rem; /* 1.35rem × 0.8 */
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+  }
+
+  /* ---- Formulários Centralizados ---- */
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 90%;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .form-group label {
+    padding-left: 5%; /* Alinha label com o input centralizado */
+  }
+
+  .form-group .error-message {
+    padding-left: 5%;
+  }
+
+  /* ---- Touch Targets: Mínimo de 48px ---- */
+  .btn {
+    min-height: 48px;
+    padding: 0.85rem 1.25rem;
+    font-size: 0.88rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    min-height: 48px;
+    padding: 14px 16px;
+  }
+
+  .form-group textarea {
+    min-height: 96px;
+    padding: 14px 16px;
+  }
+
+  .time-slot {
+    min-height: 48px;
+    padding: 0.7rem;
+  }
+
+  /* ---- Botões de Ação: Largura Total + Respiro ---- */
+  .step-actions {
+    gap: 0.75rem;
+    margin-bottom: 30px;
+  }
+
+  .step-actions .btn {
+    width: 100%;
+  }
+
+  .success-panel {
+    padding-bottom: 20px;
+  }
+
+  /* ---- Vitrine: Coluna Única ---- */
+  .vitrine-container {
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0;
+  }
+
+  .vitrine-info {
+    text-align: center;
+    align-items: center;
+    padding: 0 0.5rem;
+  }
+
+  .btn-cta {
+    width: 100%;
+  }
+
+  /* ---- Cards de Serviço ---- */
+  .service-card-booking {
+    padding: 1rem;
+  }
+
+  /* ---- Profissionais: Cards Compactos ---- */
+  .professional-card {
+    padding: 0.75rem;
+  }
+
+  .professional-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  /* ---- Resumo do Agendamento ---- */
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* ---- PIX Box ---- */
+  .pix-payment-box {
+    padding: 1rem;
+  }
+
+  .pix-key-wrapper {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pix-key-wrapper code {
+    font-size: 0.8rem;
+    word-break: break-all;
+  }
+
+  /* ---- Roleta VIP ---- */
+  .vip-container {
+    padding: 1rem;
+  }
+
+  /* ---- Footer Admin Link ---- */
+  .footer-admin-link {
+    padding: 18px 15px 22px 15px; /* Generoso para toque + safe-area */
+    font-size: 11px;
+  }
+}
