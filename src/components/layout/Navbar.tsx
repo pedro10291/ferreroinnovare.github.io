@@ -9,44 +9,48 @@ export const Navbar = () => {
 
   const navLinks = [
     { name: 'Início', path: '/' },
-    { name: 'Dra. Patrícia', path: '/dra-patricia' },
+    { name: 'A Clínica', path: '/dra-patricia' },
+    { name: 'Tratamentos', path: '/#tratamentos' },
     { name: 'Contato', path: '/#contato' },
   ];
 
   return (
     <nav className="fixed w-full z-50 bg-clinic-bg border-b border-clinic-border transition-colors duration-500">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="flex justify-between items-center h-[84px]">
+        <div className="flex justify-between items-center h-[64px] md:h-[84px]">
           
           {/* Left Side: Logo + Nav Links */}
           <div className="flex items-center gap-8 lg:gap-12">
-            <Link to="/" className="flex items-center">
-              <div className="relative w-[160px] md:w-[220px] h-[50px] md:h-[64px] overflow-hidden flex items-center justify-start">
-                <img 
-                  src="/logo.png" 
-                  alt="Ferrer Innovare Clinic" 
-                  className="absolute left-0 w-[220px] md:w-[300px] max-w-none h-auto object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              </div>
+            <Link to="/" className="flex items-center w-[110px] md:w-[210px] shrink-0">
+              <img 
+                src="/logo-ferrer-compact.png" 
+                alt="Ferrer Innovare Clinic" 
+                className="w-full h-auto object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (target.src.includes('logo-ferrer-compact.png')) {
+                    target.src = '/logo.png'; // fallback for existing logo
+                  } else {
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }
+                }}
+              />
               <span className="hidden font-serif text-2xl font-medium tracking-wide text-clinic-textPrimary">
-                Ferrer Innovare
+                Ferrer Innovare Clinic
               </span>
             </Link>
             
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.name}
-                  href={link.path}
+                  to={link.path}
                   className="text-clinic-textSecondary hover:text-clinic-textPrimary transition-colors text-xs font-semibold tracking-widest uppercase"
                 >
                   {link.name}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -85,14 +89,14 @@ export const Navbar = () => {
           >
             <div className="px-6 pt-4 pb-8 space-y-4">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.name}
-                  href={link.path}
+                  to={link.path}
                   onClick={() => setIsOpen(false)}
                   className="block text-lg font-serif text-clinic-textPrimary hover:text-clinic-gold transition-colors"
                 >
                   {link.name}
-                </a>
+                </Link>
               ))}
               <div className="pt-6 border-t border-clinic-border">
                 <Link

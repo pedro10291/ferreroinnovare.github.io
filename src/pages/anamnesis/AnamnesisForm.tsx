@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,11 +10,12 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { supabase } from '../../services/supabase';
 import { Link } from 'react-router-dom';
 
-const anamnesisSchema = z.object({
+const requestSchema = z.object({
   name: z.string().min(3, 'Nome é obrigatório'),
-  email: z.string().email('E-mail inválido'),
+  email: z.string().email('E-mail inválido').optional().or(z.literal('')),
   phone: z.string().min(10, 'Telefone inválido'),
-  birthDate: z.string().min(1, 'Data de nascimento é obrigatória'),
+  procedure_interest: z.string().min(1, 'Selecione um procedimento'),
+  birthDate: z.string().optional(),
   medicalHistory: z.string().optional(),
   medications: z.string().optional(),
   allergies: z.string().optional(),
@@ -23,10 +24,10 @@ const anamnesisSchema = z.object({
   notes: z.string().optional(),
 });
 
-type AnamnesisFormData = z.infer<typeof anamnesisSchema>;
+type RequestFormData = z.infer<typeof requestSchema>;
 
 const steps = [
-  { id: 1, title: 'Dados Pessoais' },
+  { id: 1, title: 'Contato e Interesse' },
   { id: 2, title: 'Histórico Médico' },
   { id: 3, title: 'Hábitos e Alergias' },
   { id: 4, title: 'Finalização' },
@@ -35,24 +36,39 @@ const steps = [
 export const AnamnesisForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [protocol, setProtocol] = useState<string | null>(null);
+  const [procedures, setProcedures] = useState<{id: string, title: string}[]>([]);
 
   const {
     register,
     handleSubmit,
     trigger,
     formState: { errors },
-  } = useForm<AnamnesisFormData>({
-    resolver: zodResolver(anamnesisSchema),
+  } = useForm<RequestFormData>({
+    resolver: zodResolver(requestSchema),
+    defaultValues: {
+      procedure_interest: ''
+    }
   });
 
-  const generateProtocol = () => {
-    return 'FI' + Date.now().toString().slice(-6) + Math.random().toString(36).substring(2, 5).toUpperCase();
-  };
+  useEffect(() => {
+    const fetchProcedures = async () => {
+      const { data, error } = await supabase
+        .from('procedures')
+        .select('id, title')
+        .eq('active', true)
+        .order('display_order');
+        
+      if (!error && data) {
+        setProcedures(data);
+      }
+    };
+    
+    fetchProcedures();
+  }, []);
 
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
-    if (currentStep === 1) fieldsToValidate = ['name', 'email', 'phone', 'birthDate'];
+    if (currentStep === 1) fieldsToValidate = ['name', 'email', 'phone', 'procedure_interest', 'birthDate'];
     
     const isStepValid = await trigger(fieldsToValidate);
     if (isStepValid) {
@@ -64,46 +80,41 @@ export const AnamnesisForm = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const onSubmit = async (data: AnamnesisFormData) => {
+  const onSubmit = async (data: RequestFormData) => {
     setIsSubmitting(true);
     try {
-      const generatedProtocol = generateProtocol();
+      const normalizedPhone = data.phone.replace(/\D/g, '');
       
-      // Save patient data
-      const { data: patient, error: patientError } = await supabase
-        .from('patients')
-        .insert([{
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-        }])
-        .select()
-        .single();
+      const clinicalData = {
+        birthDate: data.birthDate || null,
+        medicalHistory: data.medicalHistory ? [data.medicalHistory] : null,
+        surgeries: data.surgeries || null,
+        medications: data.medications || null,
+        allergies: data.allergies || null,
+        habits: data.habits ? [data.habits] : null,
+      };
 
-      if (patientError) throw patientError;
+      const payload = {
+        full_name: data.name,
+        email: data.email || null,
+        phone: normalizedPhone,
+        procedure_interest: data.procedure_interest,
+        message: data.notes || null,
+        clinical_data: clinicalData
+      };
 
-      // Save anamnesis
-      const { error: anamnesisError } = await supabase
-        .from('anamnesis')
-        .insert([{
-          patient_id: patient.id,
-          personal_data: { birthDate: data.birthDate },
-          medical_history: { details: data.medicalHistory },
-          medications: data.medications,
-          allergies: data.allergies,
-          surgeries: data.surgeries,
-          habits: { details: data.habits },
-          notes: data.notes,
-          protocol_number: generatedProtocol,
-        }]);
+      const { error } = await supabase
+        .from('contact_requests')
+        .insert([payload]);
 
-      if (anamnesisError) throw anamnesisError;
+      if (error) {
+        throw error;
+      }
 
-      setProtocol(generatedProtocol);
       setCurrentStep(5); // Success step
     } catch (error) {
-      console.error('Error saving anamnesis:', error);
-      alert('Ocorreu um erro ao salvar o formulário. Tente novamente.');
+      console.error(error);
+      alert('Não foi possível enviar sua solicitação. Verifique os dados e tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -119,14 +130,10 @@ export const AnamnesisForm = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
               </svg>
             </div>
-            <h2 className="text-3xl font-serif text-clinic-textPrimary">Anamnese Concluída</h2>
+            <h2 className="text-3xl font-serif text-clinic-textPrimary">Solicitação enviada</h2>
             <p className="text-clinic-textSecondary">
-              Seu formulário foi enviado com sucesso. Guarde o número do seu protocolo para o dia da sua avaliação.
+              Recebemos seus dados e nossa equipe entrará em contato em breve para confirmar os próximos passos.
             </p>
-            <div className="bg-clinic-surface p-4 rounded-lg border border-clinic-border inline-block">
-              <span className="text-sm text-clinic-textSecondary block mb-1">Número do Protocolo</span>
-              <span className="text-2xl font-mono text-clinic-gold font-bold">{protocol}</span>
-            </div>
             <div className="pt-6">
               <Link to="/">
                 <Button variant="secondary">Voltar ao Início</Button>
@@ -142,8 +149,8 @@ export const AnamnesisForm = () => {
     <div className="min-h-screen pt-32 pb-16 px-4 bg-clinic-bg">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-serif text-clinic-textPrimary">Ficha de Anamnese</h2>
-          <p className="text-clinic-textSecondary mt-2">Preencha seus dados para um atendimento personalizado.</p>
+          <h2 className="text-3xl md:text-4xl font-serif text-clinic-textPrimary">Solicitação de Atendimento</h2>
+          <p className="text-clinic-textSecondary mt-2">Preencha seus dados para recebermos seu contato.</p>
         </div>
 
         {/* Progress Bar */}
@@ -186,28 +193,45 @@ export const AnamnesisForm = () => {
                     className="space-y-4"
                   >
                     <Input 
-                      label="Nome Completo" 
+                      label="Nome Completo *" 
                       placeholder="Seu nome"
                       error={errors.name?.message}
                       {...register('name')}
                     />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Input 
-                        label="E-mail" 
+                        label="Telefone / WhatsApp *" 
+                        placeholder="(00) 00000-0000"
+                        error={errors.phone?.message}
+                        {...register('phone')}
+                      />
+                      <Input 
+                        label="E-mail (opcional)" 
                         type="email"
                         placeholder="seu@email.com"
                         error={errors.email?.message}
                         {...register('email')}
                       />
-                      <Input 
-                        label="Telefone / WhatsApp" 
-                        placeholder="(00) 00000-0000"
-                        error={errors.phone?.message}
-                        {...register('phone')}
-                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-sm font-medium text-clinic-textPrimary">
+                        Procedimento de Interesse *
+                      </label>
+                      <select
+                        className={`w-full px-4 py-2 bg-clinic-surface border rounded-md focus:outline-none focus:ring-2 focus:ring-clinic-gold/50 focus:border-clinic-gold transition-colors ${errors.procedure_interest ? 'border-red-500' : 'border-clinic-border'}`}
+                        {...register('procedure_interest')}
+                      >
+                        <option value="" disabled>Selecione um procedimento</option>
+                        {procedures.map(p => (
+                          <option key={p.id} value={p.title}>{p.title}</option>
+                        ))}
+                      </select>
+                      {errors.procedure_interest && (
+                        <p className="text-sm text-red-500">{errors.procedure_interest.message}</p>
+                      )}
                     </div>
                     <Input 
-                      label="Data de Nascimento" 
+                      label="Data de Nascimento (opcional)" 
                       type="date"
                       error={errors.birthDate?.message}
                       {...register('birthDate')}
@@ -271,8 +295,8 @@ export const AnamnesisForm = () => {
                     className="space-y-4"
                   >
                     <Textarea 
-                      label="Observações Adicionais" 
-                      placeholder="Algo mais que gostaria de nos informar antes da avaliação?"
+                      label="Mensagem / Observações Adicionais" 
+                      placeholder="Algo mais que gostaria de nos informar?"
                       {...register('notes')}
                     />
                     

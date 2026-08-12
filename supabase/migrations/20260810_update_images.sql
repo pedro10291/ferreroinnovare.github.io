@@ -1,0 +1,10 @@
+UPDATE procedures SET image = '/despigmentacao-de-sobrancelha.png' WHERE slug = 'despigmentacao-de-sobrancelha';
+UPDATE procedures SET image = '/despigmentacao-de-tatuagem.png' WHERE slug = 'despigmentacao-de-tatuagem';
+UPDATE procedures SET image = '/harmonizacao-facial.png' WHERE slug = 'harmonizacao-facial';
+UPDATE procedures SET image = '/perfiloplastia-harmonizacao-do-perfil-sem-cirurgia.png' WHERE slug = 'perfiloplastia';
+UPDATE procedures SET image = '/micropigmentacao.png' WHERE slug = 'micropigmentacao';
+UPDATE procedures SET image = '/fios-de-pdo-bioestimulacao-e-tracao.png' WHERE slug = 'fios-de-pdo';
+UPDATE procedures SET image = '/limpeza-de-pele-profissional.png' WHERE slug = 'limpeza-de-pele';
+UPDATE procedures SET image = '/toxina-botulinica-botox.png' WHERE slug = 'toxina-botulinica';
+UPDATE procedures SET image = '/remocao-de-verrugas.png' WHERE slug = 'remocao-de-verrugas';
+UPDATE procedures SET image = '/preenchimento-labial.png' WHERE slug = 'preenchimento-labial';

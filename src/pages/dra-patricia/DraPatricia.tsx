@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-export const DraPatricia = () => {
+const DraPatricia = () => {
   return (
     <div className="min-h-screen bg-clinic-bg flex flex-col">
       <div className="flex-grow flex items-center justify-center p-6">
@@ -30,3 +30,5 @@ export const DraPatricia = () => {
     </div>
   );
 };
+
+export default DraPatricia;

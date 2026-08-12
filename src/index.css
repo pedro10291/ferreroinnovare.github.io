@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-clinic-bg text-clinic-textPrimary font-sans antialiased overflow-x-hidden;
   }

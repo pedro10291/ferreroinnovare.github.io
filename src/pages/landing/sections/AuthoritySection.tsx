@@ -16,13 +16,15 @@ export const AuthoritySection = () => {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 1.5, ease: "easeOut" }}
             >
-              <div className="relative aspect-[4/5] w-full max-w-[500px] mx-auto border border-clinic-border bg-clinic-bg p-2">
-                <div className="w-full h-full bg-[#e8e2dd] flex flex-col items-center justify-center text-center">
-                  <div className="w-8 h-[1px] bg-clinic-border mb-6"></div>
-                  <p className="font-serif text-2xl text-clinic-textSecondary mb-2">Autoridade</p>
-                  <p className="text-xs uppercase tracking-widest text-clinic-textSecondary/60">Fotografia Profissional (4:5)</p>
-                  <div className="w-8 h-[1px] bg-clinic-border mt-6"></div>
-                </div>
+              <div className="relative w-full max-w-[500px] mx-auto">
+                <img 
+                  src="/foto1.jpg" 
+                  alt="Dra. Patrícia Ferrer" 
+                  className="w-full h-auto object-cover border border-clinic-border p-2"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
               </div>
             </motion.div>
           </div>

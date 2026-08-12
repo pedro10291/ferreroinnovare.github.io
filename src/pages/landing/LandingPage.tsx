@@ -1,16 +1,20 @@
 import React from 'react';
 import { HeroEditorial } from './sections/HeroEditorial';
-import { AuthoritySection } from './sections/AuthoritySection';
 import { ExpertiseSection } from './sections/ExpertiseSection';
+import { GallerySection } from './sections/GallerySection';
+import { Reviews } from './sections/Reviews';
 import { BookingSection } from './sections/BookingSection';
+import { LocationSection } from './sections/LocationSection';
 
 const LandingPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-clinic-bg text-clinic-textPrimary">
       <HeroEditorial />
-      <AuthoritySection />
       <ExpertiseSection />
+      <GallerySection />
+      <Reviews />
       <BookingSection />
+      <LocationSection />
     </div>
   );
 };
