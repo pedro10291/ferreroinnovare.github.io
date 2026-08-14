@@ -3,14 +3,11 @@ import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/rendere
 import { Patient, Anamnesis, PatientRecord } from '../../types/patient';
 import { Appointment } from '../../services/appointmentsService';
 
-// Registrando fonte para evitar problemas de caracteres
-Font.register({
-  family: 'Open Sans',
-  src: 'https://fonts.gstatic.com/s/opensans/v18/mem8YaGs126MiZpBA-UFVZ0e.ttf'
-});
+// Registra fontes se necessário (já registradas na inicialização do react-pdf globalmente,
+// mas declaramos fallback nativo standard do PDF para evitar quebras)
+// O react-pdf aceita fontes padrão como Helvetica, Times-Roman por padrão de forma segura.
 
-// Formatação de Dados
-const formatPhone = (phone: string | null | undefined): string => {
+const formatPhone = (phone: string | null): string => {
   if (!phone) return 'Não informado';
   const cleaned = phone.replace(/\D/g, '');
   if (cleaned.length === 11) {
@@ -25,20 +22,45 @@ const formatPhone = (phone: string | null | undefined): string => {
 const formatText = (value: any): string => {
   if (!value) return 'Não informado.';
   
-  let text = '';
-  // Trata arrays não semânticos (ex: ["fumo"])
-  if (Array.isArray(value)) {
-    if (value.length === 0) return 'Não informado.';
-    text = value.join(', ');
-  } else if (typeof value === 'string') {
-    text = value.trim();
-  } else {
-    text = String(value);
+  let parsedValue = value;
+  
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        parsedValue = JSON.parse(trimmed);
+      } catch (e) {
+        parsedValue = value;
+      }
+    }
   }
 
-  if (text.length === 0) return 'Não informado.';
+  const formatObject = (obj: any): string => {
+    if (Array.isArray(obj)) {
+      return obj.length > 0 ? obj.join(', ') : 'Não informado';
+    }
+    if (obj && typeof obj === 'object' && 'answer' in obj) {
+      const ans = obj.answer;
+      if (ans === 'Não' || ans === 'Nunca') {
+        return obj.details ? `${ans} (${obj.details})` : (ans === 'Não' ? 'Não possui' : 'Nunca realizou');
+      }
+      if (ans === 'Sim' || ans === 'Sim, recentemente' || ans === 'Sim, há algum tempo') {
+        return obj.details ? `${ans}: ${obj.details}` : ans;
+      }
+      return ans;
+    }
+    return typeof obj === 'object' ? JSON.stringify(obj) : String(obj);
+  };
+
+  let text = '';
+  if (typeof parsedValue === 'object') {
+    text = formatObject(parsedValue);
+  } else {
+    text = String(parsedValue).trim();
+  }
+
+  if (text.length === 0 || text === 'null' || text === 'undefined') return 'Não informado.';
   
-  // Capitaliza a primeira letra e adiciona ponto final se não houver
   let formatted = text.charAt(0).toUpperCase() + text.slice(1);
   if (!formatted.endsWith('.')) {
     formatted += '.';
@@ -51,7 +73,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 65,
     paddingHorizontal: 40,
-    fontFamily: 'Open Sans',
+    fontFamily: 'Helvetica',
     backgroundColor: '#FCFBF9'
   },
   header: {
@@ -186,15 +208,21 @@ interface PatientPDFProps {
   anamnesis: Anamnesis | null;
   records: PatientRecord[];
   appointments: Appointment[];
+  originRequest?: any | null;
 }
 
-export const PatientPDFDocument: React.FC<PatientPDFProps> = ({ patient, anamnesis, records, appointments }) => {
+export const PatientPDFDocument: React.FC<PatientPDFProps> = ({ 
+  patient, 
+  anamnesis, 
+  records, 
+  appointments, 
+  originRequest 
+}) => {
   return (
     <Document>
       <Page size="A4" style={styles.page} wrap>
         
-        {/* CABEÇALHO (Repetido em todas as páginas nativamente pelo react-pdf se fixado ou simplesmente no topo da primeira) */}
-        {/* Usamos fixed para o header aparecer em todas as páginas, caso desejado. Como a instrução era "repetir quando necessário", colocar fixed no header pode ser útil. Mas para manter o design flexível, deixaremos fixo apenas o footer, e o header no topo. */}
+        {/* CABEÇALHO */}
         <View style={styles.header} fixed>
           <View style={styles.headerLeft}>
             <Text style={styles.documentType}>Ficha do Paciente</Text>
@@ -252,7 +280,100 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({ patient, anamnes
           )}
         </View>
 
-        {/* HISTÓRICO DE ATENDIMENTOS (Tabela) */}
+        {/* PRÉ-CONSULTA RÁPIDA (Exibida dinamicamente se o paciente se originou de uma pré-consulta) */}
+        {originRequest?.clinical_data && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Pré-Consulta Rápida</Text>
+            
+            {originRequest.clinical_data.desired_procedures && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Objetivo / Procedimentos de Interesse</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.desired_procedures)}</Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.main_concerns && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Principais Incômodos</Text>
+                <Text style={styles.blockValue}>
+                  {formatText(
+                    originRequest.clinical_data.main_concerns.map((item: string) => 
+                      item === 'Outro' && originRequest.clinical_data.main_concerns_other 
+                        ? `Outro: ${originRequest.clinical_data.main_concerns_other}` 
+                        : item
+                    )
+                  )}
+                </Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.previous_procedures && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Histórico de Procedimentos</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.previous_procedures)}</Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.existing_fillers && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Preenchimentos / Produtos Existentes</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.existing_fillers)}</Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.health_conditions && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Condições de Saúde</Text>
+                <Text style={styles.blockValue}>
+                  {formatText(
+                    originRequest.clinical_data.health_conditions.map((item: string) => 
+                      item === 'Outra' && originRequest.clinical_data.health_condition_other 
+                        ? `Outra: ${originRequest.clinical_data.health_condition_other}` 
+                        : item
+                    )
+                  )}
+                </Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.continuous_medication && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Medicamentos de Uso Contínuo</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.continuous_medication)}</Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.pregnancy_breastfeeding && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Gestação / Amamentação</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.pregnancy_breastfeeding)}</Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.allergies && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Alergias</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.allergies)}</Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.desired_result && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Expectativa de Resultado</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.desired_result)}</Text>
+              </View>
+            )}
+
+            {originRequest.clinical_data.consultation_expectation && (
+              <View style={styles.block}>
+                <Text style={styles.blockLabel}>Expectativa da Avaliação</Text>
+                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.consultation_expectation)}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* HISTÓRICO DE ATENDIMENTOS */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Histórico de Atendimentos</Text>
           
@@ -287,7 +408,7 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({ patient, anamnes
           )}
         </View>
 
-        {/* RODAPÉ DINÂMICO (Em todas as páginas) */}
+        {/* RODAPÉ DINÂMICO */}
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>
             Ferrer Innovare | Documento de uso interno | Gerado em {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}

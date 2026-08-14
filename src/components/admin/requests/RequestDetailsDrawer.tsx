@@ -157,6 +157,8 @@ export const RequestDetailsDrawer: React.FC<RequestDetailsDrawerProps> = ({
             </h3>
             
             <div className="bg-white border border-gray-100 rounded-xl shadow-sm divide-y divide-gray-100">
+              
+              {/* LEGACY DATA SUPPORT */}
               {clinical_data?.birthDate && (
                 <div className="p-4">
                   <p className="text-xs text-gray-500 mb-1">Data de nascimento</p>
@@ -165,61 +167,167 @@ export const RequestDetailsDrawer: React.FC<RequestDetailsDrawerProps> = ({
                   </p>
                 </div>
               )}
-              
               {clinical_data?.medicalHistory && clinical_data.medicalHistory.length > 0 && (
                 <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-2">Histórico médico</p>
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Histórico médico (Legado)</p>
                   <div className="flex flex-wrap gap-2">
                     {clinical_data.medicalHistory.map((item: string, idx: number) => (
-                      <span key={idx} className="px-2.5 py-1 bg-red-50 text-red-700 text-xs rounded-md">
-                        {item}
-                      </span>
+                      <span key={idx} className="px-2.5 py-1 bg-red-50 text-red-700 text-xs rounded-md">{item}</span>
                     ))}
                   </div>
                 </div>
               )}
-
               {clinical_data?.pastSurgeries && (
                 <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-1">Cirurgias/procedimentos anteriores</p>
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">Cirurgias/procedimentos anteriores (Legado)</p>
                   <p className="text-sm text-gray-900">{clinical_data.pastSurgeries}</p>
                 </div>
               )}
-
-              {clinical_data?.medications && (
+              {clinical_data?.medications && !clinical_data?.continuous_medication && (
                 <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-1">Medicamentos em uso</p>
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">Medicamentos em uso (Legado)</p>
                   <p className="text-sm text-gray-900">{clinical_data.medications}</p>
                 </div>
               )}
-
-              {clinical_data?.allergies && (
+              {clinical_data?.allergies && typeof clinical_data.allergies === 'string' && (
                 <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-1">Alergias</p>
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">Alergias (Legado)</p>
                   <p className="text-sm text-gray-900 font-medium text-red-600">{clinical_data.allergies}</p>
                 </div>
               )}
-
               {clinical_data?.habits && clinical_data.habits.length > 0 && (
                 <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-2">Hábitos</p>
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Hábitos (Legado)</p>
                   <div className="flex flex-wrap gap-2">
                     {clinical_data.habits.map((item: string, idx: number) => (
-                      <span key={idx} className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
-                        {item}
-                      </span>
+                      <span key={idx} className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {clinical_data?.observations && (
+                <div className="p-4 bg-yellow-50/50">
+                  <p className="text-xs text-yellow-800/60 mb-1 uppercase tracking-wider font-semibold">Observações (Legado)</p>
+                  <p className="text-sm text-yellow-900">{clinical_data.observations}</p>
+                </div>
+              )}
+
+              {/* NEW PRE-CONSULTATION DATA */}
+              {clinical_data?.desired_procedures && clinical_data.desired_procedures.length > 0 && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">O que busca</p>
+                  <div className="space-y-1">
+                    {clinical_data.desired_procedures.map((item: string, idx: number) => (
+                      <p key={idx} className="text-sm text-gray-900 flex items-start gap-2">
+                        <span className="text-clinic-gold">→</span> {item}
+                      </p>
                     ))}
                   </div>
                 </div>
               )}
 
-              {clinical_data?.observations && (
-                <div className="p-4 bg-yellow-50/50">
-                  <p className="text-xs text-yellow-800/60 mb-1">Observações</p>
-                  <p className="text-sm text-yellow-900">{clinical_data.observations}</p>
+              {clinical_data?.main_concerns && clinical_data.main_concerns.length > 0 && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Principais Incômodos</p>
+                  <div className="space-y-1">
+                    {clinical_data.main_concerns.map((item: string, idx: number) => (
+                      <p key={idx} className="text-sm text-gray-900 flex items-start gap-2">
+                        <span className="text-clinic-gold">→</span> {item === 'Outro' && clinical_data.main_concerns_other ? `Outro: ${clinical_data.main_concerns_other}` : item}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               )}
-              
+
+              {clinical_data?.previous_procedures && typeof clinical_data.previous_procedures === 'object' && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Histórico</p>
+                  <div className="space-y-1">
+                    <p className="text-sm text-gray-900 flex items-start gap-2">
+                      <span className="text-clinic-gold">→</span> {clinical_data.previous_procedures.answer}
+                    </p>
+                    {clinical_data.previous_procedures.details && (
+                      <p className="text-sm text-gray-600 flex items-start gap-2 pl-4 italic">
+                        Detalhe: {clinical_data.previous_procedures.details}
+                      </p>
+                    )}
+                    {clinical_data?.existing_fillers && (
+                      <p className="text-sm text-gray-900 flex items-start gap-2 mt-2">
+                        <span className="text-clinic-gold">→</span> Possui preenchedores: {clinical_data.existing_fillers}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {clinical_data?.health_conditions && clinical_data.health_conditions.length > 0 && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Informações de Saúde</p>
+                  <div className="space-y-1">
+                    {clinical_data.health_conditions.map((item: string, idx: number) => (
+                      <p key={idx} className="text-sm text-gray-900 flex items-start gap-2">
+                        <span className="text-clinic-gold">→</span> {item === 'Outra' && clinical_data.health_condition_other ? `Outra: ${clinical_data.health_condition_other}` : item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {clinical_data?.continuous_medication && typeof clinical_data.continuous_medication === 'object' && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Medicamentos</p>
+                  <p className="text-sm text-gray-900 flex items-start gap-2">
+                    <span className="text-clinic-gold">→</span> {clinical_data.continuous_medication.answer}
+                  </p>
+                  {clinical_data.continuous_medication.details && (
+                    <p className="text-sm text-gray-600 flex items-start gap-2 pl-4 italic">
+                      Quais: {clinical_data.continuous_medication.details}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {clinical_data?.pregnancy_breastfeeding && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Gestação / Amamentação</p>
+                  <p className="text-sm text-gray-900 flex items-start gap-2">
+                    <span className="text-clinic-gold">→</span> {clinical_data.pregnancy_breastfeeding}
+                  </p>
+                </div>
+              )}
+
+              {clinical_data?.allergies && typeof clinical_data.allergies === 'object' && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Alergias</p>
+                  <p className="text-sm text-gray-900 flex items-start gap-2">
+                    <span className="text-clinic-gold">→</span> {clinical_data.allergies.answer}
+                  </p>
+                  {clinical_data.allergies.details && (
+                    <p className="text-sm text-red-600 flex items-start gap-2 pl-4 italic font-medium">
+                      Qual: {clinical_data.allergies.details}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {clinical_data?.desired_result && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Expectativa</p>
+                  <p className="text-sm text-gray-900 flex items-start gap-2">
+                    <span className="text-clinic-gold">→</span> {clinical_data.desired_result}
+                  </p>
+                </div>
+              )}
+
+              {clinical_data?.consultation_expectation && (
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Objetivo da Avaliação</p>
+                  <p className="text-sm text-gray-900 flex items-start gap-2">
+                    <span className="text-clinic-gold">→</span> {clinical_data.consultation_expectation}
+                  </p>
+                </div>
+              )}
+
               {!clinical_data || Object.keys(clinical_data).length === 0 ? (
                 <div className="p-6 text-center text-sm text-gray-500">
                   Nenhum dado clínico fornecido.

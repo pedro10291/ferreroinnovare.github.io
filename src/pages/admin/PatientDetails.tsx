@@ -96,11 +96,57 @@ export const PatientDetails = () => {
   const currentAnamnesis = anamnesisVersions.length > 0 ? anamnesisVersions[0] : null;
   const previousAnamnesisCount = anamnesisVersions.length > 1 ? anamnesisVersions.length - 1 : 0;
 
-  // Split appointments
-  const now = new Date();
+  // Split appointme  const now = new Date();
   const upcomingAppointments = appointments.filter(a => a.status === 'SCHEDULED' && new Date(a.scheduled_at) >= now);
   // Historico contains completed, cancelled, no_show, rescheduled and even past scheduled that were missed
   const historyAppointments = appointments.filter(a => !(a.status === 'SCHEDULED' && new Date(a.scheduled_at) >= now));
+
+  const formatClinicalValue = (value: any): string => {
+    if (!value) return 'Não informado';
+    
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return formatObjectValue(parsed);
+        } catch (e) {
+          return value;
+        }
+      }
+      return value;
+    }
+    
+    if (typeof value === 'object') {
+      return formatObjectValue(value);
+    }
+    
+    return String(value);
+  };
+
+  const formatObjectValue = (obj: any): string => {
+    if (!obj) return 'Não informado';
+    
+    if (Array.isArray(obj)) {
+      if (obj.length === 0) return 'Não informado';
+      return obj.join(', ');
+    }
+    
+    if ('answer' in obj) {
+      const ans = obj.answer;
+      if (ans === 'Não' || ans === 'Nunca') {
+        if (obj.details) return `${ans} (${obj.details})`;
+        return ans === 'Não' ? 'Não possui' : 'Nunca realizou';
+      }
+      if (ans === 'Sim' || ans === 'Sim, recentemente' || ans === 'Sim, há algum tempo') {
+        if (obj.details) return `${ans}: ${obj.details}`;
+        return ans;
+      }
+      return ans;
+    }
+    
+    return JSON.stringify(obj);
+  };
 
   const DataBlock = ({ label, value }: { label: string, value?: string | null }) => (
     <div className="mb-4">
@@ -131,6 +177,7 @@ export const PatientDetails = () => {
                 anamnesis={currentAnamnesis} 
                 records={records} 
                 appointments={appointments} 
+                originRequest={originRequest}
               />
             }
             fileName={`ficha-${patient.full_name.replace(/\s+/g, '-').toLowerCase()}.pdf`}
@@ -197,12 +244,12 @@ export const PatientDetails = () => {
             <CardContent className="p-6">
               {currentAnamnesis ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                  <DataBlock label="Doenças Relevantes" value={currentAnamnesis.relevant_diseases} />
-                  <DataBlock label="Alergias" value={currentAnamnesis.allergies} />
-                  <DataBlock label="Medicamentos em uso" value={currentAnamnesis.medications} />
-                  <DataBlock label="Procedimentos Anteriores" value={currentAnamnesis.previous_procedures} />
+                  <DataBlock label="Doenças Relevantes" value={formatClinicalValue(currentAnamnesis.relevant_diseases)} />
+                  <DataBlock label="Alergias" value={formatClinicalValue(currentAnamnesis.allergies)} />
+                  <DataBlock label="Medicamentos em uso" value={formatClinicalValue(currentAnamnesis.medications)} />
+                  <DataBlock label="Procedimentos Anteriores" value={formatClinicalValue(currentAnamnesis.previous_procedures)} />
                   <div className="sm:col-span-2">
-                    <DataBlock label="Observações Profissionais" value={currentAnamnesis.professional_notes} />
+                    <DataBlock label="Observações Profissionais" value={formatClinicalValue(currentAnamnesis.professional_notes)} />
                   </div>
                   <div className="sm:col-span-2 mt-2">
                     <p className="text-xs text-gray-400">Atualizado em {new Date(currentAnamnesis.created_at).toLocaleDateString('pt-BR')} às {new Date(currentAnamnesis.created_at).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</p>

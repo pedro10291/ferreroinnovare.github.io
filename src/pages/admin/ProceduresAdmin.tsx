@@ -9,7 +9,7 @@ export const ProceduresAdmin = () => {
   const [editingProc, setEditingProc] = useState<Procedure | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const MAX_PROCEDURES = 10;
+  const MAX_PROCEDURES = 35;
 
   useEffect(() => {
     fetchProcedures();
@@ -25,8 +25,6 @@ export const ProceduresAdmin = () => {
   const handleSave = async () => {
     if (!editingProc) return;
     try {
-      // Remover campos de array não suportados mais pela interface simplificada
-      // Mas manteremos o que tiver no db caso eles existam
       const payload = { ...editingProc, updated_at: new Date().toISOString() };
       
       const { error } = await supabase
@@ -37,11 +35,44 @@ export const ProceduresAdmin = () => {
         setEditingProc(null);
         fetchProcedures();
       } else {
-        alert('Erro ao salvar procedimento.');
-        console.error(error);
+        console.error('Erro ao salvar procedimento (Supabase):', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        alert(`Erro ao salvar procedimento: ${error.message || 'Verifique as permissões de acesso.'}`);
       }
     } catch (e) {
-      console.error(e);
+      console.error('Erro inesperado ao salvar:', e);
+      alert('Ocorreu um erro inesperado ao tentar salvar o procedimento.');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editingProc) return;
+    if (!window.confirm('Tem certeza que deseja excluir permanentemente este procedimento?')) return;
+    try {
+      const { error } = await supabase
+        .from('procedures')
+        .delete()
+        .eq('id', editingProc.id);
+        
+      if (!error) {
+        setEditingProc(null);
+        fetchProcedures();
+      } else {
+        console.error('Erro ao excluir procedimento (Supabase):', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        alert(`Erro ao excluir procedimento: ${error.message || 'Verifique as permissões de acesso.'}`);
+      }
+    } catch (e) {
+      console.error('Erro inesperado ao excluir:', e);
+      alert('Ocorreu um erro inesperado ao tentar excluir o procedimento.');
     }
   };
 
@@ -60,6 +91,8 @@ export const ProceduresAdmin = () => {
   const isLimitReached = procedures.length >= MAX_PROCEDURES;
 
   if (editingProc) {
+    const isNew = !procedures.some(p => p.id === editingProc.id);
+
     return (
       <div className="bg-clinic-bg min-h-[80vh] pb-12">
         <div className="flex items-center justify-between mb-8">
@@ -69,12 +102,22 @@ export const ProceduresAdmin = () => {
           >
             <ArrowLeft className="w-4 h-4" /> Voltar
           </button>
-          <button 
-            onClick={handleSave}
-            className="flex items-center gap-2 bg-clinic-gold text-white px-6 py-2 rounded-md hover:bg-clinic-goldDark transition-colors shadow-sm"
-          >
-            <Save className="w-4 h-4" /> Salvar Procedimento
-          </button>
+          <div className="flex items-center gap-3">
+            {!isNew && (
+              <button 
+                onClick={handleDelete}
+                className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-md hover:bg-red-100 transition-colors shadow-sm text-sm"
+              >
+                <Trash2 className="w-4 h-4" /> Excluir
+              </button>
+            )}
+            <button 
+              onClick={handleSave}
+              className="flex items-center gap-2 bg-clinic-gold text-white px-6 py-2 rounded-md hover:bg-clinic-goldDark transition-colors shadow-sm text-sm"
+            >
+              <Save className="w-4 h-4" /> Salvar Procedimento
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -97,7 +140,9 @@ export const ProceduresAdmin = () => {
           {/* Coluna dos Dados Básicos */}
           <div className="lg:col-span-2">
             <div className="bg-white p-6 border border-clinic-border rounded-xl shadow-sm">
-              <h3 className="text-lg font-serif text-clinic-textPrimary mb-6">Informações Básicas</h3>
+              <h3 className="text-lg font-serif text-clinic-textPrimary mb-6">
+                {isNew ? 'Criar Novo Procedimento' : 'Informações Básicas'}
+              </h3>
               
               <div className="space-y-4">
                 <div>
@@ -105,7 +150,24 @@ export const ProceduresAdmin = () => {
                   <input 
                     type="text" 
                     value={editingProc.title || ''} 
-                    onChange={(e) => setEditingProc({...editingProc, title: e.target.value})}
+                    onChange={(e) => {
+                      const title = e.target.value;
+                      const slug = isNew 
+                        ? title.toLowerCase()
+                               .normalize('NFD')
+                               .replace(/[\u0300-\u036f]/g, '')
+                               .replace(/[^\w\s-]/g, '')
+                               .replace(/\s+/g, '-')
+                               .replace(/--+/g, '-')
+                               .trim()
+                        : editingProc.slug;
+
+                      setEditingProc({
+                        ...editingProc,
+                        title,
+                        slug
+                      });
+                    }}
                     className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
                     placeholder="Ex: Harmonização Facial"
                   />
@@ -139,6 +201,32 @@ export const ProceduresAdmin = () => {
                     placeholder="Descreva o procedimento em detalhes..."
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-clinic-border/60">
+                  <div>
+                    <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Ordem de Exibição</label>
+                    <input 
+                      type="number" 
+                      value={editingProc.display_order || 0} 
+                      onChange={(e) => setEditingProc({...editingProc, display_order: parseInt(e.target.value) || 0})}
+                      className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                      placeholder="Ex: 1"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Define a posição de exibição na listagem.</p>
+                  </div>
+                  <div className="flex items-center pt-6">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        checked={editingProc.active ?? true} 
+                        onChange={(e) => setEditingProc({...editingProc, active: e.target.checked})}
+                        className="rounded border-gray-300 text-clinic-gold focus:ring-clinic-gold h-4 w-4"
+                      />
+                      <span className="text-xs font-semibold text-clinic-textSecondary">Procedimento Ativo</span>
+                    </label>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -161,12 +249,29 @@ export const ProceduresAdmin = () => {
           </span>
           
           <button 
-            onClick={() => setEditingProc({ id: crypto.randomUUID(), title: '', slug: '', active: true, display_order: procedures.length + 1 } as unknown as Procedure)}
+            onClick={() => {
+              const newId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+                ? crypto.randomUUID() 
+                : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+              // Calcula o maior display_order atual + 1
+              const nextOrder = procedures.length > 0 
+                ? Math.max(...procedures.map(p => p.display_order || 0)) + 1 
+                : 1;
+
+              setEditingProc({ 
+                id: newId, 
+                title: '', 
+                slug: '', 
+                active: true, 
+                display_order: nextOrder 
+              } as unknown as Procedure);
+            }}
             disabled={isLimitReached}
-            className={`px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2 shadow-sm
+            className={`px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2 shadow-sm font-medium
               ${isLimitReached 
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                : 'bg-clinic-dark text-white hover:bg-clinic-gold'
+                : 'bg-clinic-gold text-white hover:bg-clinic-goldDark'
               }`}
           >
             <Plus className="w-4 h-4" /> Novo Procedimento
