@@ -24,3 +24,13 @@ export function generateWhatsAppLink(phone: string | null | undefined): string {
   
   return `https://wa.me/${cleaned}`;
 }
+
+export function generateProcedureBookingWhatsAppLink(procedureName?: string | null): string {
+  const normalizedProcedureName = procedureName?.trim();
+  const message = normalizedProcedureName
+    ? `Olá, Dra. Patricia! Tenho interesse em realizar uma avaliação para ${normalizedProcedureName} e gostaria de verificar a disponibilidade para agendamento.`
+    : 'Olá! Gostaria de agendar uma avaliação na Ferrer Innovare Clinic.';
+
+  return `${generateWhatsAppLink(CLINIC_WHATSAPP)}?text=${encodeURIComponent(message)}`;
+}
+import { CLINIC_WHATSAPP } from '../config/constants';

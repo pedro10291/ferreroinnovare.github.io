@@ -7,6 +7,7 @@ import { CareAccordion } from '../../components/procedures/CareAccordion';
 import { ReviewsCarousel } from '../../components/ui/ReviewsCarousel';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { UNAVAILABLE_PROCEDURE_SLUGS } from '../../config/constants';
 
 export const ProcedurePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -36,7 +37,7 @@ export const ProcedurePage = () => {
           return;
         }
 
-        if (!data) {
+        if (!data || UNAVAILABLE_PROCEDURE_SLUGS.includes(slug as typeof UNAVAILABLE_PROCEDURE_SLUGS[number])) {
           setNotFound(true);
           return;
         }
@@ -196,7 +197,7 @@ export const ProcedurePage = () => {
               </p>
             )}
             <Link
-              to="/agendar"
+              to={`/agendar?procedimento=${encodeURIComponent(procedure.slug)}`}
               className="inline-flex items-center justify-center h-12 md:h-14 px-8 md:px-10 bg-clinic-textPrimary text-white text-[11px] md:text-xs font-semibold tracking-widest uppercase transition-colors duration-500 hover:bg-clinic-goldDark rounded-none"
             >
               Agendar Avaliação
@@ -435,7 +436,7 @@ export const ProcedurePage = () => {
           >
             <p className="font-serif text-2xl md:text-3xl text-clinic-textPrimary mb-5">Cada caso é único.</p>
             <Link
-              to="/agendar"
+              to={`/agendar?procedimento=${encodeURIComponent(procedure.slug)}`}
               className="inline-flex items-center justify-center h-12 md:h-14 px-8 md:px-12 bg-clinic-textPrimary text-white text-[11px] md:text-xs font-semibold tracking-widest uppercase transition-colors duration-500 hover:bg-clinic-goldDark rounded-none"
             >
               Agendar Avaliação

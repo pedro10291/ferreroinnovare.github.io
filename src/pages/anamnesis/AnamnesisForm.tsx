@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,7 +6,10 @@ import { z } from 'zod';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { supabase } from '../../services/supabase';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Procedure } from '../../types/procedure';
+import { UNAVAILABLE_PROCEDURE_SLUGS } from '../../config/constants';
+import { generateProcedureBookingWhatsAppLink } from '../../utils/whatsapp';
 
 const requestSchema = z.object({
   // Etapa 1
@@ -109,6 +112,9 @@ const CheckboxGroup = ({
 };
 
 export const AnamnesisForm = () => {
+  const [searchParams] = useSearchParams();
+  const procedureSlug = searchParams.get('procedimento');
+  const [selectedProcedure, setSelectedProcedure] = useState<Procedure | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -118,6 +124,7 @@ export const AnamnesisForm = () => {
     handleSubmit,
     control,
     watch,
+    setValue,
     trigger,
     formState: { errors },
   } = useForm<RequestFormData>({
@@ -147,6 +154,32 @@ export const AnamnesisForm = () => {
   });
 
   const watchAll = watch();
+
+  useEffect(() => {
+    const fetchSelectedProcedure = async () => {
+      if (!procedureSlug || UNAVAILABLE_PROCEDURE_SLUGS.includes(procedureSlug as typeof UNAVAILABLE_PROCEDURE_SLUGS[number])) return;
+
+      const { data, error } = await supabase
+        .from('procedures')
+        .select('*')
+        .eq('slug', procedureSlug)
+        .eq('active', true)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Não foi possível recuperar o procedimento selecionado:', error);
+        return;
+      }
+
+      if (data) {
+        const procedure = data as Procedure;
+        setSelectedProcedure(procedure);
+        setValue('desired_procedures', [procedure.title], { shouldValidate: true });
+      }
+    };
+
+    fetchSelectedProcedure();
+  }, [procedureSlug, setValue]);
 
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
@@ -209,8 +242,10 @@ export const AnamnesisForm = () => {
         return `Resultado desejado: ${data.desired_result}\nExpectativa: ${data.consultation_expectation}`;
       };
 
+      const procedureName = selectedProcedure?.title || data.desired_procedures[0] || null;
+
       const formatNotes = () => {
-        return `Interesse original: ${data.desired_procedures.join(', ')}\nIncômodos principais: ${data.main_concerns.join(', ')}`;
+        return `Interesse original: ${procedureName || 'Avaliação Geral'}\nIncômodos principais: ${data.main_concerns.join(', ')}`;
       };
       
       const clinicalData = {
@@ -250,7 +285,7 @@ export const AnamnesisForm = () => {
         full_name: data.name,
         email: null,
         phone: normalizedPhone,
-        procedure_interest: data.desired_procedures[0] || 'Avaliação Geral',
+        procedure_interest: procedureName || 'Avaliação Geral',
         message: null,
         clinical_data: clinicalData
       };
@@ -284,11 +319,17 @@ export const AnamnesisForm = () => {
           <p className="text-sm text-clinic-textSecondary font-light leading-relaxed max-w-sm mx-auto">
             Agora nossa equipe poderá entender melhor o que você busca e preparar seu atendimento. Entraremos em contato em breve.
           </p>
-          <div className="pt-8">
-            <Link to="/">
-              <Button className="px-8 h-12 bg-clinic-textPrimary hover:bg-clinic-goldDark text-white rounded-none uppercase tracking-widest text-xs">
-                Voltar para o site
-              </Button>
+          <div className="pt-8 flex flex-col items-center gap-4">
+            <a
+              href={generateProcedureBookingWhatsAppLink(selectedProcedure?.title || watchAll.desired_procedures[0])}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-8 h-12 bg-clinic-textPrimary hover:bg-clinic-goldDark text-white rounded-none uppercase tracking-widest text-xs transition-colors duration-300"
+            >
+              Continuar para o WhatsApp
+            </a>
+            <Link to="/" className="text-[10px] uppercase tracking-[0.2em] text-clinic-textSecondary hover:text-clinic-goldDark transition-colors">
+              Voltar para o site
             </Link>
           </div>
         </div>
@@ -346,6 +387,7 @@ export const AnamnesisForm = () => {
                     render={({ field }) => (
                       <CheckboxGroup 
                         options={[
+                          ...(selectedProcedure ? [selectedProcedure.title] : []),
                           'Rejuvenescimento facial',
                           'Botox',
                           'Preenchimento',

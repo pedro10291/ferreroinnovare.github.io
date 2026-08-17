@@ -18,7 +18,6 @@ const CATEGORY_MAP: Record<string, string[]> = {
     "perfiloplastia",
     "fios-de-pdo",
     "toxina-botulinica",
-    "lipo-de-papada",
     "preenchimento-de-mandibula",
     "preenchimento-de-olheiras",
     "rejuvenescimento-facial",
@@ -607,20 +606,13 @@ export const TreatmentsCatalog = () => {
                   )}
 
                   {/* CTAs */}
-                  <div className="pt-6 border-t border-clinic-border/30 flex flex-col sm:flex-row gap-4 items-center">
+                  <div className="pt-6 border-t border-clinic-border/30">
                     <Link
-                      to="/agendar"
+                      to={`/agendar?procedimento=${encodeURIComponent(activeProcedure.slug)}`}
                       className="inline-flex items-center justify-center h-12 px-8 bg-clinic-textPrimary text-white text-[11px] font-semibold tracking-widest uppercase transition-colors duration-500 hover:bg-clinic-goldDark rounded-none w-full sm:w-auto"
                     >
-                      Agendar Avaliação
+                      AGENDAR ESTE TRATAMENTO
                       <ArrowRight className="w-4 h-4 ml-3" strokeWidth={1.5} />
-                    </Link>
-                    <Link
-                      to={`/procedimentos/${activeProcedure.slug}`}
-                      className="inline-flex items-center justify-center h-12 px-8 border border-clinic-border text-clinic-textSecondary text-[11px] font-semibold tracking-widest uppercase transition-colors duration-500 hover:text-clinic-textPrimary hover:bg-clinic-surface rounded-none w-full sm:w-auto"
-                    >
-                      Ver detalhes
-                      <ArrowRight className="w-4 h-4 ml-3 text-clinic-gold" strokeWidth={1.5} />
                     </Link>
                   </div>
 
@@ -948,20 +940,13 @@ export const TreatmentsCatalog = () => {
                                   )}
 
                                   {/* CTAs */}
-                                  <div className="pt-4 border-t border-clinic-border/30 flex flex-col gap-3">
+                                  <div className="pt-4 border-t border-clinic-border/30">
                                     <Link
-                                      to="/agendar"
-                                      className="inline-flex items-center justify-center h-11 bg-clinic-textPrimary text-white text-[10px] font-semibold tracking-widest uppercase transition-colors duration-500 hover:bg-clinic-goldDark rounded-none"
+                                      to={`/agendar?procedimento=${encodeURIComponent(proc.slug)}`}
+                                      className="inline-flex items-center justify-center h-11 bg-clinic-textPrimary text-white text-[10px] font-semibold tracking-widest uppercase transition-colors duration-500 hover:bg-clinic-goldDark rounded-none w-full"
                                     >
-                                      Agendar Avaliação
+                                      AGENDAR ESTE TRATAMENTO
                                       <ArrowRight className="w-3.5 h-3.5 ml-2.5" strokeWidth={1.5} />
-                                    </Link>
-                                    <Link
-                                      to={`/procedimentos/${proc.slug}`}
-                                      className="inline-flex items-center justify-center h-11 border border-clinic-border text-clinic-textSecondary text-[10px] font-semibold tracking-widest uppercase transition-colors duration-500 hover:text-clinic-textPrimary hover:bg-clinic-surface rounded-none"
-                                    >
-                                      Ver detalhes
-                                      <ArrowRight className="w-3.5 h-3.5 ml-2.5 text-clinic-gold" strokeWidth={1.5} />
                                     </Link>
                                   </div>
 

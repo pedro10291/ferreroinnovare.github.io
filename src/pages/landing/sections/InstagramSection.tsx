@@ -1,39 +1,45 @@
 import React from 'react';
 
 export const InstagramSection = () => {
+  const instagramUrl = 'https://www.instagram.com/ferrer.innovareclinic/';
+
   return (
     <section className="py-24 md:py-36 bg-[#FCFBF9] border-t border-clinic-border/50">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 text-center">
-        
-        <div className="max-w-2xl mx-auto flex flex-col items-center">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-clinic-gold font-bold mb-6 block">Resultados</span>
-          
-          <h2 className="text-3xl md:text-5xl font-serif text-clinic-dark mb-6 leading-tight">
-            Veja resultados e acompanhe nosso trabalho.
-          </h2>
-          
-          <p className="text-sm md:text-base text-clinic-textSecondary font-light leading-relaxed mb-12 max-w-lg">
-            Conheça nossos resultados, acompanhe os procedimentos e veja um pouco mais do trabalho da Ferrer Innovare diretamente no Instagram.
-          </p>
-          
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="grid lg:grid-cols-12 lg:items-start gap-x-16 gap-y-10 lg:gap-x-24 lg:gap-y-8">
+          <div className="lg:col-span-5 flex flex-col items-start text-left">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-clinic-gold font-bold mb-4 block">
+              RESULTADOS
+            </span>
+            <h2 className="text-3xl md:text-5xl font-serif text-clinic-textPrimary mb-6 leading-tight font-normal">
+              Veja resultados e acompanhe nosso trabalho.
+            </h2>
+            <p className="text-xs md:text-sm text-clinic-textSecondary/80 font-light leading-relaxed mb-6 max-w-lg">
+              Conheça alguns dos nossos resultados e acompanhe de perto o trabalho da Ferrer Innovare Clinic.
+            </p>
+            <p className="text-xs text-clinic-textSecondary/80 font-light leading-relaxed max-w-md">
+              Resultados, procedimentos e bastidores diretamente no Instagram.
+            </p>
+          </div>
+
+          <figure className="order-2 lg:order-none lg:col-start-8 lg:col-span-4 lg:row-span-2 w-full max-w-[360px] lg:max-w-[390px] justify-self-center lg:justify-self-end">
+            <img
+              src="/preenchimento-labial.jpg"
+              alt="Resultado de procedimento da Ferrer Innovare Clinic"
+              className="w-full aspect-[3/4] object-cover border border-clinic-border/40 transition-opacity duration-300 hover:opacity-95"
+            />
+          </figure>
+
           <a
-            href="https://instagram.com/ferrerinnovare"
+            href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-10 h-14 bg-clinic-textPrimary hover:bg-clinic-goldDark text-white rounded-none uppercase tracking-[0.2em] text-[11px] font-semibold transition-colors duration-300 group"
+            className="order-3 lg:order-none lg:col-span-5 inline-flex w-fit items-center gap-3 text-[11px] font-semibold tracking-[0.3em] uppercase text-clinic-textPrimary hover:text-clinic-gold transition-colors duration-300 group"
           >
-            Ver resultados no Instagram
-            <svg 
-              className="w-4 h-4 ml-3 transform group-hover:translate-x-1 transition-transform" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            VER MAIS RESULTADOS
+            <span className="text-[14px] transition-transform duration-300 group-hover:translate-x-1 font-light">→</span>
           </a>
         </div>
-
       </div>
     </section>
   );
