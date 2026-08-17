@@ -4,4 +4,4 @@ export const CLINIC_WHATSAPP_NUMBER_MOCK = "5511999999999"; // Fallback/Mock con
 export const CLINIC_WHATSAPP = CLINIC_WHATSAPP_NUMBER; // Usamos o número de atendimento real homologado
 
 // Procedimentos descontinuados não devem ser acessíveis no catálogo ou em deep links.
-export const UNAVAILABLE_PROCEDURE_SLUGS = ['lipo-de-papada'] as const;
+export const UNAVAILABLE_PROCEDURE_SLUGS = [] as const;

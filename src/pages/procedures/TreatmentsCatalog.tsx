@@ -8,7 +8,7 @@ import { AlertCircle, ArrowRight, ChevronDown, ChevronUp, Clock, HelpCircle } fr
 const CATEGORIES = [
   { id: 'face', name: 'FACE', key: '01' },
   { id: 'labios-sobrancelhas', name: 'LÁBIOS & SOBRANCELHAS', key: '02' },
-  { id: 'pele-capilar', name: 'PELE & CAPILAR', key: '03' },
+  { id: 'pele', name: 'PELE', key: '03' },
   { id: 'corporal', name: 'CORPORAL', key: '04' }
 ];
 
@@ -18,10 +18,10 @@ const CATEGORY_MAP: Record<string, string[]> = {
     "perfiloplastia",
     "fios-de-pdo",
     "toxina-botulinica",
+    "lipo-de-papada",
     "preenchimento-de-mandibula",
     "preenchimento-de-olheiras",
-    "rejuvenescimento-facial",
-    "bioestimulador-de-colageno"
+    "rejuvenescimento-facial"
   ],
   'labios-sobrancelhas': [
     "remocao-micropigmentacao",
@@ -30,14 +30,15 @@ const CATEGORY_MAP: Record<string, string[]> = {
     "preenchimento-labial",
     "micropigmentacao-labial"
   ],
-  'pele-capilar': [
+  'pele': [
     "limpeza-de-pele",
     "remocao-de-verrugas",
     "rejuvenescimento-capilar",
     "secagem-de-vasos"
   ],
   'corporal': [
-    "harmonizacao-de-gluteos"
+    "harmonizacao-de-gluteos",
+    "bioestimulador-de-colageno"
   ]
 };
 
@@ -100,6 +101,19 @@ export const TreatmentsCatalog = () => {
     fetchProcedures();
   }, []);
 
+  useEffect(() => {
+    if (procedures.length > 0) {
+      const allMappedSlugs = Object.values(CATEGORY_MAP).flat();
+      procedures.forEach(p => {
+        if (!allMappedSlugs.includes(p.slug)) {
+          console.warn(`Procedimento não categorizado no TreatmentsCatalog: "${p.title}" (slug: ${p.slug})`);
+        }
+      });
+    }
+  }, [procedures]);
+
+
+
   const handleCategorySelectDesktop = (catId: string) => {
     setActiveCategory(catId);
     const catProcs = procedures.filter(p => CATEGORY_MAP[catId].includes(p.slug));
@@ -131,10 +145,46 @@ export const TreatmentsCatalog = () => {
     if (expandedProcedureMobileId === procId) {
       setExpandedProcedureMobileId(null);
     } else {
+      const currentOpenId = expandedProcedureMobileId;
       setExpandedProcedureMobileId(procId);
       setActiveModalityIndex(0);
       setPreCareOpen(false);
       setPostCareOpen(false);
+
+      // Perform smooth, natural, and continuous scroll transition
+      const newElement = document.getElementById(`proc-mobile-${procId}`);
+      if (newElement) {
+        const navbar = document.querySelector('nav');
+        const navbarHeight = navbar?.getBoundingClientRect().height ?? 70;
+        const padding = 16;
+
+        const newRect = newElement.getBoundingClientRect();
+        const scrollTop = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+        let targetY = newRect.top + scrollTop - navbarHeight - padding;
+
+        if (currentOpenId) {
+          const oldElement = document.getElementById(`proc-mobile-${currentOpenId}`);
+          if (oldElement) {
+            const oldRect = oldElement.getBoundingClientRect();
+            // If the clicked element is below the currently open one, subtract the height that will collapse
+            if (newRect.top > oldRect.top) {
+              const oldExpandedDiv = oldElement.querySelector('.overflow-hidden');
+              const oldHeight = oldExpandedDiv?.getBoundingClientRect().height ?? 0;
+              targetY -= oldHeight;
+            }
+          }
+        }
+
+        // Delay the smooth scroll by 150ms so that the collapse/expand animations
+        // and the scroll transition merge into a single continuous, natural movement
+        // without browser layout conflicts or jumping.
+        setTimeout(() => {
+          window.scrollTo({
+            top: targetY,
+            behavior: 'smooth'
+          });
+        }, 150);
+      }
     }
   };
 
@@ -217,7 +267,7 @@ export const TreatmentsCatalog = () => {
   }
 
   return (
-    <div className="min-h-screen bg-clinic-bg pt-24 md:pt-36 pb-24">
+    <div className="min-h-screen bg-clinic-bg pt-8 md:pt-36 pb-24">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Breadcrumb */}
@@ -508,7 +558,7 @@ export const TreatmentsCatalog = () => {
                   )}
 
                   {/* Care Accordions */}
-                  {(activeProcedure.pre_care || activeProcedure.post_care) && (
+                  {((activeProcedure.pre_care && activeProcedure.pre_care.length > 0) || (activeProcedure.post_care && activeProcedure.post_care.length > 0)) && (
                     <div className="pt-4 space-y-2">
                       <span className="text-[9px] uppercase tracking-[0.2em] text-clinic-goldDark font-bold block mb-2">Cuidados</span>
                       
@@ -575,7 +625,7 @@ export const TreatmentsCatalog = () => {
                   )}
 
                   {/* Important information / Differential / Contraindications */}
-                  {(activeProcedure.important_information || activeProcedure.contraindications) && (
+                  {((activeProcedure.important_information && activeProcedure.important_information.length > 0) || (activeProcedure.contraindications && activeProcedure.contraindications.length > 0)) && (
                     <div className="p-6 bg-clinic-surface/30 border border-clinic-border/50 text-left space-y-5">
                       <div className="flex items-center gap-3">
                         <HelpCircle className="w-4.5 h-4.5 text-clinic-goldDark" />
@@ -678,7 +728,7 @@ export const TreatmentsCatalog = () => {
                         }
 
                         return (
-                          <div key={proc.id} className="border-t border-clinic-border/10 pt-3">
+                          <div id={`proc-mobile-${proc.id}`} key={proc.id} className="border-t border-clinic-border/10 pt-3">
                             <button
                               onClick={() => handleProcedureToggleMobile(proc.id)}
                               className="w-full flex items-baseline justify-between text-left py-2 focus:outline-none focus:ring-0"
@@ -848,7 +898,7 @@ export const TreatmentsCatalog = () => {
                                   )}
 
                                   {/* Care Accordions */}
-                                  {(proc.pre_care || proc.post_care) && (
+                                  {((proc.pre_care && proc.pre_care.length > 0) || (proc.post_care && proc.post_care.length > 0)) && (
                                     <div className="space-y-2">
                                       {proc.pre_care && proc.pre_care.length > 0 && (
                                         <div className="border border-clinic-border/40">
@@ -913,7 +963,7 @@ export const TreatmentsCatalog = () => {
                                   )}
 
                                   {/* Important info / Differential / Contraindications */}
-                                  {(proc.important_information || proc.contraindications) && (
+                                  {((proc.important_information && proc.important_information.length > 0) || (proc.contraindications && proc.contraindications.length > 0)) && (
                                     <div className="p-4 bg-clinic-surface/30 border border-clinic-border/50 text-left space-y-4">
                                       {proc.contraindications && proc.contraindications.length > 0 && (
                                         <div>

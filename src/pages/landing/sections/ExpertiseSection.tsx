@@ -23,7 +23,7 @@ export const ExpertiseSection = () => {
 
           <figure className="order-2 lg:order-none lg:col-start-8 lg:col-span-4 lg:row-span-2 w-full max-w-[360px] lg:max-w-[390px] justify-self-center lg:justify-self-end">
             <img
-              src="/rejuvenescimento-facial.jpg"
+              src="/toxina-botulinica-botox.png"
               alt="Abordagem de tratamentos da Ferrer Innovare Clinic"
               className="w-full aspect-[3/4] object-cover border border-clinic-border/40 transition-opacity duration-300 hover:opacity-95"
             />

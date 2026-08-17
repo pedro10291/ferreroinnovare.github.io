@@ -28,14 +28,14 @@ const DraPatricia = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-clinic-bg text-clinic-textPrimary pt-24 md:pt-36 pb-24">
+    <div className="min-h-screen bg-clinic-bg text-clinic-textPrimary pt-6 md:pt-36 pb-24">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
         
         {/* Breadcrumb / Back Navigation */}
-        <div className="mb-12 md:mb-16">
+        <div className="mb-8 md:mb-16">
           <Link
             to="/"
-            className="inline-flex items-center gap-3 text-[10px] md:text-xs font-semibold tracking-[0.2em] uppercase text-clinic-textSecondary hover:text-clinic-goldDark transition-colors duration-300 group"
+            className="inline-flex items-center gap-3 text-[10px] md:text-xs font-semibold tracking-[0.2em] uppercase text-clinic-textSecondary hover:text-[#77655D] transition-colors duration-300 group"
           >
             <span className="w-6 h-[1px] bg-clinic-textSecondary group-hover:bg-clinic-goldDark transition-all duration-300 group-hover:w-10"></span>
             Voltar para o início
@@ -43,7 +43,7 @@ const DraPatricia = () => {
         </div>
 
         {/* SECTION 1: HERO / APRESENTAÇÃO */}
-        <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start mb-24 md:mb-32">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-24 items-start mb-24 md:mb-32">
           
           {/* FOTOGRAFIA / PLACEHOLDER (Left on Desktop) */}
           <div className="w-full lg:w-5/12 flex justify-center lg:justify-start shrink-0">
@@ -57,19 +57,19 @@ const DraPatricia = () => {
                 /* Sophisticated Editorial Placeholder matching HUART rules */
                 <div className="relative w-full aspect-[3/4] border border-clinic-border bg-clinic-surface flex flex-col justify-between p-8 md:p-12 select-none shadow-sm">
                   <div className="flex justify-between items-start">
-                    <span className="font-serif text-clinic-gold text-4xl leading-none">P</span>
+                    <span className="font-serif text-[#9A8175] text-4xl leading-none">P</span>
                     <div className="w-16 h-[1px] bg-clinic-gold/30 mt-4"></div>
                   </div>
                   <div className="my-auto py-8 text-center">
                     <span className="font-serif text-clinic-textPrimary/25 tracking-[0.2em] text-sm uppercase block mb-3">Dra. Patrícia Ferrer</span>
-                    <p className="font-serif text-3xl md:text-4xl text-clinic-goldDark/30 tracking-widest leading-relaxed">
+                    <p className="font-serif text-3xl md:text-4xl text-[#77655D]/30 tracking-widest leading-relaxed">
                       CIÊNCIA &<br />
                       <span className="italic">NATURALIDADE</span>
                     </p>
                   </div>
                   <div className="flex justify-between items-end">
                     <div className="w-16 h-[1px] bg-clinic-gold/30 mb-4"></div>
-                    <span className="font-serif text-clinic-gold text-4xl leading-none">F</span>
+                    <span className="font-serif text-[#9A8175] text-4xl leading-none">F</span>
                   </div>
                 </div>
               ) : (
@@ -77,7 +77,7 @@ const DraPatricia = () => {
                   {/* Subtle editorial offset frame */}
                   <div className="absolute inset-0 border border-clinic-gold/20 translate-x-3 translate-y-3 -z-10"></div>
                   <img 
-                    src="/foto1.jpg" 
+                    src="/dra-patricia.jpg" 
                     alt="Dra. Patrícia Santana" 
                     className="w-full h-auto object-cover border border-clinic-border bg-white p-2"
                     onError={() => {
@@ -98,13 +98,13 @@ const DraPatricia = () => {
               className="space-y-8"
             >
               <div className="space-y-4">
-                <span className="text-[10px] uppercase tracking-[0.25em] text-clinic-gold font-bold block">Fundadora e Especialista</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block">Fundadora e Especialista</span>
                 <h1 className="text-4xl md:text-6xl font-serif text-clinic-textPrimary leading-tight">
                   Quem Sou Eu
                 </h1>
-                <h2 className="text-sm md:text-base text-clinic-goldDark font-semibold tracking-[0.2em] uppercase max-w-lg mt-2">
-                  Ciência, experiência e resultados naturais.
-                </h2>
+                <h2 className="text-sm md:text-base text-[#77655D] font-semibold tracking-[0.2em] uppercase max-w-lg mt-2">
+  Ciência, experiência e resultados naturais.
+</h2>
               </div>
 
               <div className="space-y-6 text-[15px] md:text-lg text-clinic-textSecondary font-light leading-relaxed max-w-2xl">
@@ -119,7 +119,7 @@ const DraPatricia = () => {
               {/* Posicionamento Quote Section */}
               <div className="pt-8 border-t border-clinic-border/60 max-w-2xl">
                 <p className="font-serif text-lg md:text-2xl text-clinic-textPrimary/80 italic leading-relaxed">
-                  "Mais de uma década dedicada à estética, unindo conhecimento científico, experiência clínica e <span className="text-clinic-goldDark font-semibold not-italic">resultados naturais</span> para valorizar a beleza individual de cada paciente."
+                  "Mais de uma década dedicada à estética, unindo conhecimento científico, experiência clínica e <span className="text-[#77655D] font-semibold not-italic">resultados naturais</span> para valorizar a beleza individual de cada paciente."
                 </p>
               </div>
             </motion.div>
@@ -139,7 +139,7 @@ const DraPatricia = () => {
             className="space-y-8"
           >
             <div className="space-y-2">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-clinic-gold font-bold block">Portfolio Clínico</span>
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block">Portfolio Clínico</span>
               <h2 className="text-3xl font-serif text-clinic-textPrimary">Especialidades</h2>
             </div>
             
@@ -163,14 +163,14 @@ const DraPatricia = () => {
             className="space-y-8"
           >
             <div className="space-y-2">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-clinic-gold font-bold block">Pilares de Atuação</span>
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block">Pilares de Atuação</span>
               <h2 className="text-3xl font-serif text-clinic-textPrimary">Diferenciais</h2>
             </div>
 
             <div className="space-y-6">
               {/* Destaque Visual para Acne Control */}
               <div className="p-6 bg-clinic-surface/40 border border-clinic-border rounded-none space-y-2 shadow-[0_4px_20px_rgba(201,139,132,0.02)]">
-                <span className="text-[9px] uppercase tracking-[0.2em] text-clinic-goldDark font-bold">Protocolo Exclusivo</span>
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#77655D] font-bold">Protocolo Exclusivo</span>
                 <h3 className="text-base font-serif text-clinic-textPrimary font-semibold leading-tight">
                   Criadora do Método Acne Control – Pele de Porcelana
                 </h3>
@@ -208,14 +208,14 @@ const DraPatricia = () => {
             className="space-y-8 max-w-4xl"
           >
             <div className="space-y-2">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-clinic-gold font-bold block">Currículo Clínico</span>
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block">Currículo Clínico</span>
               <h2 className="text-3xl font-serif text-clinic-textPrimary">Formação e Especializações</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 border-l border-clinic-gold/20 pl-6">
               {credentials.map((item, index) => (
                 <div key={index} className="flex items-start gap-4 py-1.5">
-                  <span className="text-clinic-gold/60 font-serif text-sm font-medium shrink-0 pt-0.5">
+                  <span className="text-[#9A8175]/60 font-serif text-sm font-medium shrink-0 pt-0.5">
                     {(index + 1).toString().padStart(2, '0')}.
                   </span>
                   <span className="text-sm text-clinic-textSecondary font-light leading-relaxed">

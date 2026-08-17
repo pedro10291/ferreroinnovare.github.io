@@ -376,7 +376,7 @@ export const ProcedurePage = () => {
           )}
 
           {/* Accordions */}
-          {(procedure.pre_care || procedure.post_care) && (
+          {((procedure.pre_care && procedure.pre_care.length > 0) || (procedure.post_care && procedure.post_care.length > 0)) && (
             <motion.section 
               initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
               className="mb-10 md:mb-14"
@@ -394,7 +394,7 @@ export const ProcedurePage = () => {
           )}
 
           {/* Importante / Contraindicações */}
-          {(procedure.important_information || procedure.contraindications) && (
+          {((procedure.important_information && procedure.important_information.length > 0) || (procedure.contraindications && procedure.contraindications.length > 0)) && (
             <motion.section 
               initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
               className="mb-10 md:mb-14 p-6 md:p-8 bg-clinic-surface border border-clinic-border"
