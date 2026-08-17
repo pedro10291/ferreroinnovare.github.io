@@ -4,11 +4,11 @@ import { motion } from 'framer-motion';
 
 export const HeroEditorial = () => {
   return (
-    <section className="bg-clinic-bg pt-32 md:pt-48 pb-20 md:pb-32 overflow-hidden">
+    <section className="bg-clinic-bg pt-6 md:pt-48 pb-12 md:pb-32 overflow-hidden">
       <div className="max-w-[1400px] w-full mx-auto px-6 sm:px-8 lg:px-12 flex flex-col">
         
         {/* Text Content (Bottom on Mobile, Top on Desktop) */}
-        <div className="w-full max-w-4xl mx-auto order-2 md:order-1 mt-12 md:mt-0 mb-0 md:mb-20 text-center">
+        <div className="w-full max-w-4xl mx-auto order-2 md:order-1 mt-8 md:mt-0 mb-0 md:mb-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}

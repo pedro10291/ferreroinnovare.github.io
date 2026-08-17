@@ -12,6 +12,7 @@ const LandingPage = React.lazy(() => import('./pages/landing/LandingPage'));
 const AnamnesisForm = React.lazy(() => import('./pages/anamnesis/AnamnesisForm').then(module => ({ default: module.AnamnesisForm })));
 const DraPatricia = React.lazy(() => import('./pages/dra-patricia/DraPatricia'));
 const ProcedurePage = React.lazy(() => import('./pages/procedures/ProcedurePage').then(module => ({ default: module.ProcedurePage })));
+const TreatmentsCatalog = React.lazy(() => import('./pages/procedures/TreatmentsCatalog').then(module => ({ default: module.TreatmentsCatalog })));
 const Login = React.lazy(() => import('./pages/admin/Login'));
 const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 const AdminProcedures = React.lazy(() => import('./pages/admin/ProceduresAdmin').then(module => ({ default: module.ProceduresAdmin })));
@@ -39,6 +40,7 @@ function App() {
             <Route path="agendar" element={<AnamnesisForm />} />
             <Route path="dra-patricia" element={<DraPatricia />} />
             <Route path="procedimentos/:slug" element={<ProcedurePage />} />
+            <Route path="tratamentos" element={<TreatmentsCatalog />} />
           </Route>
           
           {/* Admin routes */}
