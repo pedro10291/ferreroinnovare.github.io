@@ -2,12 +2,18 @@ import { supabase } from './supabase';
 import { AppointmentWithRelations, PatientSearchResult, Procedure, Professional } from '../types/appointment';
 
 export const appointmentsService = {
+  // Controlled list of professionals (Não são usuários do painel)
+  async fetchProfessionals(): Promise<Professional[]> {
+    return [
+      { id: 'patricia', full_name: 'Dra. Patrícia Santana' },
+      { id: 'shaiane', full_name: 'Shaiane Santos' },
+      { id: 'luana', full_name: 'Luana Paula' }
+    ];
+  },
+
   // Queries (RLS handles security)
   async fetchAppointments(dateStr: string, professionalId?: string): Promise<AppointmentWithRelations[]> {
     // dateStr format: 'YYYY-MM-DD'
-    const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
-    // adjust for local time if necessary, but since we store UTC, let's query the specific day in UTC boundaries or local boundaries
-    // We will use local time boundary for the given date
     const start = new Date(dateStr + 'T00:00:00');
     const end = new Date(dateStr + 'T23:59:59');
 
@@ -24,19 +30,38 @@ export const appointmentsService = {
       .order('scheduled_at', { ascending: true });
 
     if (professionalId && professionalId !== 'all') {
-      query = query.eq('professional_id', professionalId);
+      let profName = "";
+      if (professionalId === 'patricia') profName = "Dra. Patrícia Santana";
+      else if (professionalId === 'shaiane') profName = "Shaiane Santos";
+      else if (professionalId === 'luana') profName = "Luana Paula";
+      
+      if (profName) {
+        query = query.ilike('notes', `%[Profissional: ${profName}]%`);
+      }
     }
 
     const { data, error } = await query;
     if (error) throw error;
     
     // Transform single object arrays into direct objects due to foreign keys
-    return (data as any[]).map(app => ({
-      ...app,
-      patient: Array.isArray(app.patient) ? app.patient[0] : app.patient,
-      professional: Array.isArray(app.professional) ? app.professional[0] : app.professional,
-      procedure: Array.isArray(app.procedure) ? app.procedure[0] : app.procedure,
-    })) as AppointmentWithRelations[];
+    return (data as any[]).map(app => {
+      let profName = Array.isArray(app.professional) ? app.professional[0]?.full_name : app.professional?.full_name;
+      let displayNotes = app.notes;
+      if (app.notes) {
+        const match = app.notes.match(/\[Profissional:\s*([^\]]+)\]/);
+        if (match) {
+           profName = match[1];
+           displayNotes = app.notes.replace(/\[Profissional:\s*[^\]]+\]\n?/, '').trim();
+        }
+      }
+      return {
+        ...app,
+        notes: displayNotes,
+        patient: Array.isArray(app.patient) ? app.patient[0] : app.patient,
+        professional: { full_name: profName },
+        procedure: Array.isArray(app.procedure) ? app.procedure[0] : app.procedure,
+      };
+    }) as AppointmentWithRelations[];
   },
 
   async fetchPatients(search: string): Promise<PatientSearchResult[]> {
@@ -53,23 +78,31 @@ export const appointmentsService = {
   async fetchProcedures(): Promise<Procedure[]> {
     const { data, error } = await supabase
       .from('procedures')
-      .select('id, title, duration_minutes')
-      .eq('is_active', true)
+      .select('id, title, duration')
+      .eq('active', true)
       .order('title');
     if (error) throw error;
-    return data;
-  },
-
-  async fetchProfessionals(): Promise<Professional[]> {
-    // Apenas admins ou equipe médica/staff autorizada a atender
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .eq('active', true)
-      .in('role', ['admin', 'staff']) // Supondo que equipe = staff ou admin
-      .order('full_name');
-    if (error) throw error;
-    return data;
+    
+    return data.map((proc: any) => {
+      let mins = 60;
+      if (proc.duration) {
+        const match = proc.duration.match(/(\d+)\s*(min|h|hr|hora)/i);
+        if (match) {
+           const val = parseInt(match[1]);
+           const unit = match[2].toLowerCase();
+           if (unit.startsWith('h')) {
+              mins = val * 60;
+           } else {
+              mins = val;
+           }
+        }
+      }
+      return {
+        id: proc.id,
+        title: proc.title,
+        duration_minutes: mins
+      };
+    });
   },
 
   // RPC Mutations (No direct inserts/updates)
@@ -81,13 +114,25 @@ export const appointmentsService = {
     duration_minutes: number;
     notes?: string;
   }): Promise<string> {
+    // Para satisfazer a Foreign Key sem criar usuários fakes, buscamos o ID do admin
+    const { data: profile } = await supabase.from('profiles').select('id').limit(1).single();
+    const dbAdminId = profile?.id;
+    if (!dbAdminId) throw new Error("Sistema: nenhum usuário administrativo encontrado para ancorar o agendamento.");
+
+    let profName = "";
+    if (params.professional_id === 'patricia') profName = "Dra. Patrícia Santana";
+    else if (params.professional_id === 'shaiane') profName = "Shaiane Santos";
+    else if (params.professional_id === 'luana') profName = "Luana Paula";
+    
+    const notesWithProf = profName ? `[Profissional: ${profName}]\n${params.notes || ''}` : params.notes;
+
     const { data, error } = await supabase.rpc('create_appointment', {
       p_patient_id: params.patient_id,
       p_procedure_id: params.procedure_id,
-      p_professional_id: params.professional_id,
+      p_professional_id: dbAdminId,
       p_scheduled_at: params.scheduled_at,
       p_duration_minutes: params.duration_minutes,
-      p_notes: params.notes || null,
+      p_notes: notesWithProf || null,
     });
     if (error) throw error;
     return data;

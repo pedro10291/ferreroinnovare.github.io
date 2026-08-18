@@ -12,6 +12,7 @@ import { appointmentsService } from '../../services/appointmentsService';
 import { AppointmentWithRelations, Professional } from '../../types/appointment';
 import { Button } from '../../components/ui/Button';
 import { Plus, Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 export const Agenda: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());

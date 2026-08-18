@@ -19,7 +19,7 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps = {}) => {
   }
 
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/painel/login" replace />;
   }
 
   // Se tem usuário mas não tem profile, ou o profile está inativo, ou a role não é admin/staff

@@ -43,7 +43,7 @@ export const Login = () => {
       setError('Credenciais inválidas');
       setIsLoading(false);
     } else {
-      navigate('/admin');
+      navigate('/painel');
     }
   };
 
@@ -56,7 +56,7 @@ export const Login = () => {
   }
 
   if (user) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/painel" replace />;
   }
 
   return (

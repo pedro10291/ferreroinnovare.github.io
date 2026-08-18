@@ -17,7 +17,8 @@ export const patientsService = {
 
     let query = supabase
       .from('patients')
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .eq('active', true);
 
     if (searchTerm) {
       // Usar .or para buscar em multiplas colunas
@@ -44,6 +45,32 @@ export const patientsService = {
 
     if (error) throw error;
     return data;
+  },
+
+  /**
+   * Deletes a patient safely. Tries physical delete first (for clean test data),
+   * falls back to soft-delete (active = false) if relationships exist.
+   */
+  async deletePatient(id: string): Promise<void> {
+    // 1. Tenta exclusão física (seguro para dados sem relacionamentos/FKs)
+    const { error: deleteError } = await supabase
+      .from('patients')
+      .delete()
+      .eq('id', id);
+
+    // 2. Se houver erro de Foreign Key (ex: tem appointments, anamnesis, etc), faz soft-delete
+    if (deleteError) {
+      if (deleteError.code === '23503') {
+        const { error: updateError } = await supabase
+          .from('patients')
+          .update({ active: false })
+          .eq('id', id);
+          
+        if (updateError) throw updateError;
+      } else {
+        throw deleteError;
+      }
+    }
   },
 
   /**

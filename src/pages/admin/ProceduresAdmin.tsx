@@ -229,6 +229,167 @@ export const ProceduresAdmin = () => {
 
               </div>
             </div>
+
+            {/* Características do Tratamento */}
+            <div className="bg-white p-6 border border-clinic-border rounded-xl shadow-sm mt-8">
+              <h3 className="text-lg font-serif text-clinic-textPrimary mb-6">Características do Tratamento</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Duração (Ex: 45 minutos)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.duration || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, duration: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Sessões (Ex: 1 a 3 sessões)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.sessions || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, sessions: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Intervalo (Ex: 15 dias)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.interval || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, interval: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Manutenção (Ex: A cada 6 meses)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.maintenance || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, maintenance: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Resultado (Ex: Imediato)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.result || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, result: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Indicação (Ex: Rugas e flacidez)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.indication || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, indication: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Preço Numérico (Ex: 900)</label>
+                  <input 
+                    type="number" 
+                    value={editingProc.price || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, price: Number(e.target.value) || undefined})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Rótulo do Preço (Ex: A partir de R$ 900)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.price_label || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, price_label: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Categoria (Ex: Facial)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.category || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, category: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Rótulo do Botão CTA (Ex: Agendar Avaliação)</label>
+                  <input 
+                    type="text" 
+                    value={editingProc.cta_label || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, cta_label: e.target.value})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md focus:ring-1 focus:ring-clinic-gold focus:border-clinic-gold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Instruções Editoriais */}
+            <div className="bg-white p-6 border border-clinic-border rounded-xl shadow-sm mt-8">
+              <h3 className="text-lg font-serif text-clinic-textPrimary mb-2">Instruções Editoriais (Listas)</h3>
+              <p className="text-xs text-gray-500 mb-6">Digite um item por linha. As quebras de linha separarão os itens automaticamente.</p>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Benefícios</label>
+                  <textarea 
+                    value={editingProc.benefits?.join('\n') || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, benefits: e.target.value.split('\n').filter(Boolean)})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md h-24 whitespace-pre-wrap"
+                    placeholder="Um benefício por linha..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Como Funciona</label>
+                  <textarea 
+                    value={editingProc.how_it_works?.join('\n') || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, how_it_works: e.target.value.split('\n').filter(Boolean)})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md h-24 whitespace-pre-wrap"
+                    placeholder="Uma etapa por linha..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Pré-Procedimento</label>
+                  <textarea 
+                    value={editingProc.pre_care?.join('\n') || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, pre_care: e.target.value.split('\n').filter(Boolean)})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md h-24 whitespace-pre-wrap"
+                    placeholder="Um cuidado por linha..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Pós-Procedimento</label>
+                  <textarea 
+                    value={editingProc.post_care?.join('\n') || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, post_care: e.target.value.split('\n').filter(Boolean)})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md h-24 whitespace-pre-wrap"
+                    placeholder="Um cuidado por linha..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Informações Importantes</label>
+                  <textarea 
+                    value={editingProc.important_information?.join('\n') || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, important_information: e.target.value.split('\n').filter(Boolean)})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md h-24 whitespace-pre-wrap"
+                    placeholder="Uma informação por linha..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-clinic-textSecondary mb-1">Contraindicações</label>
+                  <textarea 
+                    value={editingProc.contraindications?.join('\n') || ''} 
+                    onChange={(e) => setEditingProc({...editingProc, contraindications: e.target.value.split('\n').filter(Boolean)})}
+                    className="w-full px-4 py-2 border border-clinic-border rounded-md h-24 whitespace-pre-wrap"
+                    placeholder="Uma contraindicação por linha..."
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

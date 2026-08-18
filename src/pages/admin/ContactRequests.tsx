@@ -71,7 +71,7 @@ export default function ContactRequests() {
   };
 
   const handleOpenPatient = (patientId: string) => {
-    navigate(`/admin/pacientes/${patientId}`);
+    navigate(`/painel/pacientes/${patientId}`);
   };
 
   return (

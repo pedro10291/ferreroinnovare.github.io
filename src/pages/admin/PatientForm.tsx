@@ -56,7 +56,7 @@ export const PatientForm = () => {
       const newPatient = await patientsService.createPatient(payload);
       
       // Redirect to the new patient's details page
-      navigate(`/admin/pacientes/${newPatient.id}`);
+      navigate(`/painel/pacientes/${newPatient.id}`);
     } catch (err: any) {
       console.error('Erro ao criar paciente:', err);
       setError('Ocorreu um erro ao criar o paciente. Tente novamente.');
@@ -70,7 +70,7 @@ export const PatientForm = () => {
       {/* Top Nav */}
       <div className="flex items-center gap-4">
         <button 
-          onClick={() => navigate('/admin/pacientes')}
+          onClick={() => navigate('/painel/pacientes')}
           className="p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 text-gray-500 hover:text-gray-900"
         >
           <ArrowLeft className="w-5 h-5" />

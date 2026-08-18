@@ -21,8 +21,7 @@ const AdminAgenda = React.lazy(() => import('./pages/admin/Agenda').then(module 
 const AdminPatients = React.lazy(() => import('./pages/admin/Patients').then(module => ({ default: module.Patients })));
 const AdminPatientForm = React.lazy(() => import('./pages/admin/PatientForm').then(module => ({ default: module.PatientForm })));
 const AdminPatientDetails = React.lazy(() => import('./pages/admin/PatientDetails').then(module => ({ default: module.PatientDetails })));
-const AdminGallery = React.lazy(() => import('./pages/admin/Gallery').then(module => ({ default: module.Gallery })));
-const AdminTeam = React.lazy(() => import('./pages/admin/Team').then(module => ({ default: module.Team })));
+const PrivacyPolicy = React.lazy(() => import('./pages/legal/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
 
 function App() {
   return (
@@ -41,12 +40,13 @@ function App() {
             <Route path="dra-patricia" element={<DraPatricia />} />
             <Route path="procedimentos/:slug" element={<ProcedurePage />} />
             <Route path="tratamentos" element={<TreatmentsCatalog />} />
+            <Route path="politica-de-privacidade" element={<PrivacyPolicy />} />
           </Route>
           
           {/* Admin routes */}
-          <Route path="/admin/login" element={<Login />} />
+          <Route path="/painel/login" element={<Login />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/painel" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="procedimentos" element={<AdminProcedures />} />
               <Route path="solicitacoes" element={<AdminContactRequests />} />
@@ -54,10 +54,6 @@ function App() {
               <Route path="pacientes" element={<AdminPatients />} />
               <Route path="pacientes/new" element={<AdminPatientForm />} />
               <Route path="pacientes/:id" element={<AdminPatientDetails />} />
-              <Route path="galeria" element={<AdminGallery />} />
-              <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-                <Route path="equipe" element={<AdminTeam />} />
-              </Route>
             </Route>
           </Route>
         </Routes>

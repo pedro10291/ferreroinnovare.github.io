@@ -24,6 +24,24 @@ export const PatientDetails = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [originRequest, setOriginRequest] = useState<ContactRequest | null>(null);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!patient) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await patientsService.deletePatient(patient.id);
+      navigate('/painel/pacientes', { state: { message: 'Paciente excluído com sucesso.' } });
+    } catch (err: any) {
+      console.error('Erro ao excluir paciente:', err);
+      setDeleteError('Não foi possível excluir o paciente. Verifique sua conexão e tente novamente.');
+      setIsDeleting(false);
+    }
+  };
+
   useEffect(() => {
     const fetchAllData = async () => {
       if (!id) return;
@@ -84,7 +102,7 @@ export const PatientDetails = () => {
         </div>
         <h3 className="text-lg font-medium text-gray-900">{error || "Paciente não encontrado."}</h3>
         <button 
-          onClick={() => navigate('/admin/pacientes')}
+          onClick={() => navigate('/painel/pacientes')}
           className="flex items-center gap-2 px-4 py-2 mt-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar para lista
@@ -96,7 +114,8 @@ export const PatientDetails = () => {
   const currentAnamnesis = anamnesisVersions.length > 0 ? anamnesisVersions[0] : null;
   const previousAnamnesisCount = anamnesisVersions.length > 1 ? anamnesisVersions.length - 1 : 0;
 
-  // Split appointme  const now = new Date();
+  // Split appointments
+  const now = new Date();
   const upcomingAppointments = appointments.filter(a => a.status === 'SCHEDULED' && new Date(a.scheduled_at) >= now);
   // Historico contains completed, cancelled, no_show, rescheduled and even past scheduled that were missed
   const historyAppointments = appointments.filter(a => !(a.status === 'SCHEDULED' && new Date(a.scheduled_at) >= now));
@@ -161,7 +180,7 @@ export const PatientDetails = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => navigate('/admin/pacientes')}
+            onClick={() => navigate('/painel/pacientes')}
             className="p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-gray-200 text-gray-500 hover:text-gray-900"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -406,6 +425,64 @@ export const PatientDetails = () => {
 
         </div>
       </div>
+
+      {/* Zona de atenção */}
+      <div className="mt-12 border-t border-red-100 pt-8 max-w-3xl">
+        <h3 className="text-lg font-serif text-red-900 mb-2 flex items-center gap-2">
+          <ShieldAlert className="w-5 h-5" /> Zona de atenção
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Ações destrutivas relacionadas a este paciente.
+        </p>
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="px-4 py-2 bg-white border border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 rounded-lg text-sm font-medium transition-colors"
+        >
+          Excluir paciente
+        </button>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !isDeleting && setShowDeleteModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 overflow-hidden max-w-[calc(100vw-32px)] sm:max-w-md">
+            <h2 className="text-xl font-serif text-gray-900 mb-2">Excluir paciente?</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              Esta ação removerá o cadastro deste paciente e os dados relacionados conforme as regras atuais do sistema.<br/><br/>
+              Essa ação não pode ser desfeita.
+            </p>
+            
+            {deleteError && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-2">
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center min-w-[140px] transition-colors"
+              >
+                {isDeleting ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'Excluir paciente'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

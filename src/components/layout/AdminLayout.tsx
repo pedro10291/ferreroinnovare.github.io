@@ -10,13 +10,11 @@ export const AdminLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, roles: ['admin', 'staff'] },
-    { name: 'Solicitações', href: '/admin/solicitacoes', icon: ClipboardList, roles: ['admin', 'staff'] },
-    { name: 'Agenda', href: '/admin/agenda', icon: Calendar, roles: ['admin', 'staff'] },
-    { name: 'Pacientes', href: '/admin/pacientes', icon: Users, roles: ['admin', 'staff'] },
-    { name: 'Procedimentos', href: '/admin/procedimentos', icon: Settings, roles: ['admin', 'staff'] },
-    { name: 'Galeria', href: '/admin/galeria', icon: Image, roles: ['admin', 'staff'] },
-    { name: 'Equipe', href: '/admin/equipe', icon: Shield, roles: ['admin'] },
+    { name: 'Dashboard', href: '/painel', icon: LayoutDashboard, roles: ['admin', 'staff'] },
+    { name: 'Solicitações', href: '/painel/solicitacoes', icon: ClipboardList, roles: ['admin', 'staff'] },
+    { name: 'Agenda', href: '/painel/agenda', icon: Calendar, roles: ['admin', 'staff'] },
+    { name: 'Pacientes', href: '/painel/pacientes', icon: Users, roles: ['admin', 'staff'] },
+    { name: 'Procedimentos', href: '/painel/procedimentos', icon: Settings, roles: ['admin', 'staff'] },
   ];
 
   const filteredNavigation = navigation.filter(item => profile && item.roles.includes(profile.role));
@@ -26,7 +24,7 @@ export const AdminLayout = () => {
   const NavLinks = () => (
     <>
       {filteredNavigation.map((item) => {
-        const isActive = location.pathname === item.href || (location.pathname !== '/admin' && item.href !== '/admin' && location.pathname.startsWith(item.href));
+        const isActive = location.pathname === item.href || (location.pathname !== '/painel' && item.href !== '/painel' && location.pathname.startsWith(item.href));
         return (
           <Link
             key={item.name}
