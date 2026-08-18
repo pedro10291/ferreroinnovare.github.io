@@ -1,54 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../services/supabase';
 import { Procedure } from '../../types/procedure';
 import { AlertCircle, ArrowRight, ChevronDown, ChevronUp, Clock, HelpCircle } from 'lucide-react';
 
-const CATEGORIES = [
-  { id: 'face', name: 'FACE', key: '01' },
-  { id: 'labios-sobrancelhas', name: 'LÁBIOS & SOBRANCELHAS', key: '02' },
-  { id: 'pele', name: 'PELE', key: '03' },
-  { id: 'corporal', name: 'CORPORAL', key: '04' }
-];
-
-const CATEGORY_MAP: Record<string, string[]> = {
-  'face': [
-    "harmonizacao-facial",
-    "perfiloplastia",
-    "fios-de-pdo",
-    "toxina-botulinica",
-    "lipo-de-papada",
-    "preenchimento-de-mandibula",
-    "preenchimento-de-olheiras",
-    "rejuvenescimento-facial"
-  ],
-  'labios-sobrancelhas': [
-    "remocao-micropigmentacao",
-    "despigmentacao-tatuagem",
-    "micropigmentacao",
-    "preenchimento-labial",
-    "micropigmentacao-labial"
-  ],
-  'pele': [
-    "limpeza-de-pele",
-    "remocao-de-verrugas",
-    "rejuvenescimento-capilar",
-    "secagem-de-vasos"
-  ],
-  'corporal': [
-    "harmonizacao-de-gluteos",
-    "bioestimulador-de-colageno"
-  ]
-};
-
 export const TreatmentsCatalog = () => {
   const [procedures, setProcedures] = useState<Procedure[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Dynamic Categories Computation
+  const categories = useMemo(() => {
+    const rawCategories = Array.from(new Set(procedures.map(p => (p.category || 'Outros').toUpperCase())));
+    return rawCategories
+      .sort((a, b) => {
+        const order = ['PELE', 'CORPORAL', 'CAPILAR'];
+        const aIdx = order.indexOf(a);
+        const bIdx = order.indexOf(b);
+        if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+        if (aIdx !== -1) return -1;
+        if (bIdx !== -1) return 1;
+        return a.localeCompare(b);
+      })
+      .map((name, index) => ({
+        id: name.toLowerCase().replace(/\s+/g, '-'),
+        name: name,
+        key: String(index + 1).padStart(2, '0')
+      }));
+  }, [procedures]);
+
   // Desktop States
-  const [activeCategory, setActiveCategory] = useState('face');
+  const [activeCategory, setActiveCategory] = useState<string>('pele');
   const [activeProcedureId, setActiveProcedureId] = useState<string | null>(null);
   
   // Mobile States
@@ -61,6 +44,12 @@ export const TreatmentsCatalog = () => {
   // Accordion care state
   const [preCareOpen, setPreCareOpen] = useState(false);
   const [postCareOpen, setPostCareOpen] = useState(false);
+
+  // Filter procedures by category helper
+  const getProceduresByCategory = (catId: string) => {
+    const catName = categories.find(c => c.id === catId)?.name || '';
+    return procedures.filter(p => (p.category || 'Outros').toUpperCase() === catName);
+  };
 
   useEffect(() => {
     const fetchProcedures = async () => {
@@ -79,15 +68,32 @@ export const TreatmentsCatalog = () => {
           return;
         }
 
-        setProcedures(data as Procedure[] || []);
+        const procs = data as Procedure[] || [];
+        setProcedures(procs);
         
         // Initialize default active procedure for desktop
-        if (data && data.length > 0) {
-          const faceProcs = data.filter(p => CATEGORY_MAP['face'].includes(p.slug));
-          if (faceProcs.length > 0) {
-            setActiveProcedureId(faceProcs[0].id);
+        if (procs.length > 0) {
+          // Dynamic category initialization
+          const rawCats = Array.from(new Set(procs.map(p => (p.category || 'Outros').toUpperCase())));
+          const sortedCats = rawCats.sort((a, b) => {
+            const order = ['PELE', 'CORPORAL', 'CAPILAR'];
+            const aIdx = order.indexOf(a);
+            const bIdx = order.indexOf(b);
+            if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+            if (aIdx !== -1) return -1;
+            if (bIdx !== -1) return 1;
+            return a.localeCompare(b);
+          });
+          const firstCatName = sortedCats.length > 0 ? sortedCats[0] : 'PELE';
+          const firstCatId = firstCatName.toLowerCase().replace(/\s+/g, '-');
+          
+          setActiveCategory(firstCatId);
+          
+          const firstCatProcs = procs.filter(p => (p.category || 'Outros').toUpperCase() === firstCatName);
+          if (firstCatProcs.length > 0) {
+            setActiveProcedureId(firstCatProcs[0].id);
           } else {
-            setActiveProcedureId(data[0].id);
+            setActiveProcedureId(procs[0].id);
           }
         }
       } catch (err: any) {
@@ -101,22 +107,9 @@ export const TreatmentsCatalog = () => {
     fetchProcedures();
   }, []);
 
-  useEffect(() => {
-    if (procedures.length > 0) {
-      const allMappedSlugs = Object.values(CATEGORY_MAP).flat();
-      procedures.forEach(p => {
-        if (!allMappedSlugs.includes(p.slug)) {
-          console.warn(`Procedimento não categorizado no TreatmentsCatalog: "${p.title}" (slug: ${p.slug})`);
-        }
-      });
-    }
-  }, [procedures]);
-
-
-
   const handleCategorySelectDesktop = (catId: string) => {
     setActiveCategory(catId);
-    const catProcs = procedures.filter(p => CATEGORY_MAP[catId].includes(p.slug));
+    const catProcs = getProceduresByCategory(catId);
     if (catProcs.length > 0) {
       setActiveProcedureId(catProcs[0].id);
       setActiveModalityIndex(0);
@@ -188,13 +181,7 @@ export const TreatmentsCatalog = () => {
     }
   };
 
-  // Filter procedures by category helper
-  const getProceduresByCategory = (catId: string) => {
-    const slugs = CATEGORY_MAP[catId] || [];
-    return slugs
-      .map(slug => procedures.find(p => p.slug === slug))
-      .filter((p): p is Procedure => p !== undefined);
-  };
+
 
   // Find active procedure object
   const activeProcedure = procedures.find(p => p.id === activeProcedureId) || null;
@@ -302,7 +289,7 @@ export const TreatmentsCatalog = () => {
           
           {/* LEFT SIDEBAR: Categories & Procedures Acordion */}
           <div className="w-5/12 shrink-0 flex flex-col space-y-6 pr-6 border-r border-clinic-border/30">
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const catProcs = getProceduresByCategory(cat.id);
               const isOpen = activeCategory === cat.id;
 
@@ -679,7 +666,7 @@ export const TreatmentsCatalog = () => {
 
         {/* MOBILE LAYOUT (Hides on Desktop) */}
         <div className="block lg:hidden w-full flex flex-col space-y-6">
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const catProcs = getProceduresByCategory(cat.id);
             const isCatOpen = expandedCategoryMobile === cat.id;
 

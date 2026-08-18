@@ -40,7 +40,7 @@ export const Footer = () => {
               />
             </Link>
             <p className="text-clinic-textSecondary font-light text-xs leading-relaxed max-w-[260px]">
-              Exclusividade e excelência em dermatologia e estética avançada.
+              Cuidado, técnica e excelência em estética avançada.
             </p>
           </div>
 

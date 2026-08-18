@@ -39,12 +39,8 @@ export const ReviewsCarousel = () => {
           ))}
         </div>
         <div className="flex flex-col sm:flex-row items-center sm:space-x-3">
-          <span className="text-3xl md:text-4xl font-serif text-clinic-textPrimary mb-1 sm:mb-0">
-            {googleReviewsStats.average.toString().replace('.', ',')}
-          </span>
-          <div className="w-6 h-[1px] bg-clinic-border hidden sm:block"></div>
-          <span className="text-xs md:text-sm font-light text-clinic-textSecondary uppercase tracking-widest mt-1">
-            {googleReviewsStats.total} avaliações no Google
+          <span className="text-sm md:text-base font-light text-clinic-textSecondary uppercase tracking-widest mt-1">
+            Avaliações no Google
           </span>
         </div>
       </div>
