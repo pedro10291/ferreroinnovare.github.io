@@ -28,12 +28,19 @@ export const HeroEditorial = () => {
               Estética Avançada e Saúde
             </p>
             
-            <div className="pt-6 md:pt-8">
+            <div className="pt-6 md:pt-8 flex flex-col items-center justify-center space-y-5">
               <Link
                 to="/agendar"
                 className="inline-flex items-center justify-center h-14 md:h-16 px-10 md:px-12 bg-clinic-textPrimary text-white text-[11px] md:text-xs font-semibold tracking-[0.25em] uppercase transition-colors duration-300 hover:bg-clinic-goldDark rounded-none shadow-sm"
               >
                 Agendar Avaliação
+              </Link>
+              <Link
+                to="/dra-patricia"
+                className="inline-flex items-center gap-2 text-[10px] md:text-[11px] font-semibold tracking-[0.2em] uppercase text-clinic-textSecondary hover:text-clinic-goldDark transition-colors duration-300 group"
+              >
+                Sobre mim
+                <span className="font-light group-hover:translate-x-[2px] transition-transform duration-300">→</span>
               </Link>
             </div>
           </motion.div>
@@ -49,8 +56,8 @@ export const HeroEditorial = () => {
           >
             <div className="relative border border-clinic-border/40 p-2 bg-white/40 shadow-sm">
               <img 
-                src="/foto_equipe.jpg" 
-                alt="Equipe Ferrer Innovare Clinic" 
+                src="/dra-patricia.jpg" 
+                alt="Dra. Patricia Santana" 
                 className="w-full h-auto object-contain mx-auto"
                 loading="eager"
                 onError={(e) => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { HeroEditorial } from './sections/HeroEditorial';
+import { ClinicSection } from './sections/ClinicSection';
 import { ExpertiseSection } from './sections/ExpertiseSection';
 import { InstagramSection } from './sections/InstagramSection';
 import { Reviews } from './sections/Reviews';
@@ -10,6 +11,7 @@ const LandingPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-clinic-bg text-clinic-textPrimary">
       <HeroEditorial />
+      <ClinicSection />
       <ExpertiseSection />
       <InstagramSection />
       <Reviews />

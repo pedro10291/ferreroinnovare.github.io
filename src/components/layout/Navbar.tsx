@@ -9,7 +9,7 @@ export const Navbar = () => {
 
   const navLinks = [
     { name: 'Início', path: '/' },
-    { name: 'A Clínica', path: '/dra-patricia' },
+    { name: 'Sobre mim', path: '/dra-patricia' },
     { name: 'Tratamentos', path: '/#tratamentos' },
     { name: 'Contato', path: '/#contato' },
   ];

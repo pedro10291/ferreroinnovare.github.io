@@ -309,27 +309,31 @@ export const TreatmentsCatalog = () => {
               return (
                 <div key={cat.id} className="border-b border-clinic-border/20 pb-4">
                   <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={`desktop-cat-${cat.id}`}
                     onClick={() => handleCategorySelectDesktop(cat.id)}
-                    className="w-full flex items-center justify-between text-left py-2 focus:outline-none focus:ring-0 group"
+                    className="w-full flex items-center justify-between text-left py-2 focus:outline-none focus:ring-0 group cursor-pointer active:opacity-70 transition-opacity"
                   >
                     <div className="flex items-baseline gap-4">
                       <span className="text-[10px] font-light text-clinic-goldDark/50 tracking-wider">
                         {cat.key}
                       </span>
-                      <h2 className={`font-serif text-lg tracking-widest transition-colors duration-300 ${
-                        isOpen ? 'text-clinic-gold font-normal' : 'text-clinic-textPrimary/80 hover:text-clinic-gold font-light'
+                      <h2 className={`font-serif text-lg tracking-widest transition-all duration-300 group-hover:translate-x-[2px] ${
+                        isOpen ? 'text-clinic-gold font-normal' : 'text-clinic-textPrimary/80 group-hover:text-clinic-gold font-light'
                       }`}>
                         {cat.name}
                       </h2>
                     </div>
-                    <span className="text-[10px] text-clinic-textSecondary/40 group-hover:text-clinic-gold transition-colors">
-                      {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    <span className="text-xl font-light text-clinic-textSecondary/40 transition-all duration-300 group-hover:text-clinic-gold group-hover:translate-x-[2px]">
+                      {isOpen ? '−' : '+'}
                     </span>
                   </button>
 
                   <AnimatePresence initial={false}>
                     {isOpen && (
                       <motion.div
+                        id={`desktop-cat-${cat.id}`}
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -683,19 +687,22 @@ export const TreatmentsCatalog = () => {
               <div key={cat.id} className="border-b border-clinic-border/30 pb-4">
                 {/* Category Heading Toggle */}
                 <button
+                  type="button"
+                  aria-expanded={isCatOpen}
+                  aria-controls={`mobile-cat-${cat.id}`}
                   onClick={() => handleCategoryToggleMobile(cat.id)}
-                  className="w-full flex items-center justify-between text-left py-3 focus:outline-none focus:ring-0 group"
+                  className="w-full flex items-center justify-between text-left py-3 focus:outline-none focus:ring-0 group cursor-pointer active:opacity-70 transition-opacity"
                 >
                   <div className="flex flex-col">
                     <span className="text-[9px] font-mono tracking-widest text-clinic-goldDark/50 mb-1">
                       {cat.key}
                     </span>
-                    <h2 className="font-serif text-lg md:text-xl tracking-widest text-clinic-textPrimary">
+                    <h2 className="font-serif text-lg md:text-xl tracking-widest text-clinic-textPrimary transition-transform duration-300 group-hover:translate-x-[2px]">
                       {cat.name}
                     </h2>
                   </div>
-                  <span className="text-[10px] text-clinic-textSecondary/40 group-hover:text-clinic-gold transition-colors">
-                    {isCatOpen ? 'Ocultar tratamentos ↑' : 'Explorar tratamentos →'}
+                  <span className="text-xl font-light text-clinic-textSecondary/40 transition-all duration-300 group-hover:text-clinic-gold group-hover:translate-x-[2px]">
+                    {isCatOpen ? '−' : '+'}
                   </span>
                 </button>
 
@@ -703,6 +710,7 @@ export const TreatmentsCatalog = () => {
                 <AnimatePresence initial={false}>
                   {isCatOpen && (
                     <motion.div
+                      id={`mobile-cat-${cat.id}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}

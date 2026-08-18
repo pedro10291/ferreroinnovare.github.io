@@ -44,7 +44,7 @@ export const Footer = () => {
             <h3 className="font-serif text-base text-clinic-textPrimary mb-4">Navegação</h3>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-[12px] text-clinic-textSecondary">
               <Link to="/" className="hover:text-clinic-goldDark transition-colors">Início</Link>
-              <Link to="/dra-patricia" className="hover:text-clinic-goldDark transition-colors">A Clínica</Link>
+              <Link to="/dra-patricia" className="hover:text-clinic-goldDark transition-colors">Sobre mim</Link>
               <Link to="/#tratamentos" className="hover:text-clinic-goldDark transition-colors">Tratamentos</Link>
               <Link to="/#contato" className="hover:text-clinic-goldDark transition-colors">Contato</Link>
             </div>

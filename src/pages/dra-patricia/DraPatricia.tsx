@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const DraPatricia = () => {
-  const [imageError, setImageError] = useState(false);
-
   const specialties = [
     'Rejuvenescimento Facial',
     'Toxina Botulínica (Botox)',
@@ -42,72 +40,34 @@ const DraPatricia = () => {
           </Link>
         </div>
 
-        {/* SECTION 1: HERO / APRESENTAÇÃO */}
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-24 items-start mb-24 md:mb-32">
-          
-          {/* FOTOGRAFIA / PLACEHOLDER (Left on Desktop) */}
-          <div className="w-full lg:w-5/12 flex justify-center lg:justify-start shrink-0">
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-              className="w-full max-w-[420px]"
-            >
-              {imageError ? (
-                /* Sophisticated Editorial Placeholder matching HUART rules */
-                <div className="relative w-full aspect-[3/4] border border-clinic-border bg-clinic-surface flex flex-col justify-between p-8 md:p-12 select-none shadow-sm">
-                  <div className="flex justify-between items-start">
-                    <span className="font-serif text-[#9A8175] text-4xl leading-none">P</span>
-                    <div className="w-16 h-[1px] bg-clinic-gold/30 mt-4"></div>
-                  </div>
-                  <div className="my-auto py-8 text-center">
-                    <span className="font-serif text-clinic-textPrimary/25 tracking-[0.2em] text-sm uppercase block mb-3">Dra. Patrícia Ferrer</span>
-                    <p className="font-serif text-3xl md:text-4xl text-[#77655D]/30 tracking-widest leading-relaxed">
-                      CIÊNCIA &<br />
-                      <span className="italic">NATURALIDADE</span>
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-end">
-                    <div className="w-16 h-[1px] bg-clinic-gold/30 mb-4"></div>
-                    <span className="font-serif text-[#9A8175] text-4xl leading-none">F</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="relative w-full">
-                  {/* Subtle editorial offset frame */}
-                  <div className="absolute inset-0 border border-clinic-gold/20 translate-x-3 translate-y-3 -z-10"></div>
-                  <img 
-                    src="/dra-patricia.jpg" 
-                    alt="Dra. Patrícia Santana" 
-                    className="w-full h-auto object-cover border border-clinic-border bg-white p-2"
-                    onError={() => {
-                      setImageError(true);
-                    }}
-                  />
-                </div>
-              )}
-            </motion.div>
-          </div>
+        {/* EDITORIAL HEADER */}
+        <div className="max-w-4xl mb-12 md:mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block mb-4">Sobre mim</span>
+            <h1 className="text-4xl md:text-6xl font-serif text-clinic-textPrimary leading-tight mb-4">
+              Dra. Patrícia Santana
+            </h1>
+            <h2 className="text-sm md:text-base text-[#77655D] font-semibold tracking-[0.2em] uppercase">
+              Ciência, experiência e resultados naturais
+            </h2>
+          </motion.div>
+        </div>
 
-          {/* APRESENTAÇÃO TEXTUAL (Right on Desktop) */}
-          <div className="w-full lg:w-7/12 flex flex-col justify-center">
+        {/* SECTION 1: BIOGRAFIA */}
+        <div className="mb-24 md:mb-32">
+          
+          <div className="w-full max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
               className="space-y-8"
             >
-              <div className="space-y-4">
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block">Fundadora e Especialista</span>
-                <h1 className="text-4xl md:text-6xl font-serif text-clinic-textPrimary leading-tight">
-                  Quem Sou Eu
-                </h1>
-                <h2 className="text-sm md:text-base text-[#77655D] font-semibold tracking-[0.2em] uppercase max-w-lg mt-2">
-  Ciência, experiência e resultados naturais.
-</h2>
-              </div>
-
-              <div className="space-y-6 text-[15px] md:text-lg text-clinic-textSecondary font-light leading-relaxed max-w-2xl">
+              <div className="space-y-6 text-[15px] md:text-lg text-clinic-textSecondary font-light leading-relaxed">
                 <p>
                   Sou Bacharel em Biomedicina e Graduada em Estética e Cosmética, atuando na área da estética desde 2014, unindo ciência, saúde e beleza em uma abordagem individualizada e baseada em evidências científicas.
                 </p>
@@ -117,7 +77,7 @@ const DraPatricia = () => {
               </div>
 
               {/* Posicionamento Quote Section */}
-              <div className="pt-8 border-t border-clinic-border/60 max-w-2xl">
+              <div className="pt-8 border-t border-clinic-border/60">
                 <p className="font-serif text-lg md:text-2xl text-clinic-textPrimary/80 italic leading-relaxed">
                   "Mais de uma década dedicada à estética, unindo conhecimento científico, experiência clínica e <span className="text-[#77655D] font-semibold not-italic">resultados naturais</span> para valorizar a beleza individual de cada paciente."
                 </p>
@@ -163,8 +123,8 @@ const DraPatricia = () => {
             className="space-y-8"
           >
             <div className="space-y-2">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block">Pilares de Atuação</span>
-              <h2 className="text-3xl font-serif text-clinic-textPrimary">Diferenciais</h2>
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[#9A8175] font-bold block">Meus Pilares</span>
+              <h2 className="text-3xl font-serif text-clinic-textPrimary">Meus Diferenciais</h2>
             </div>
 
             <div className="space-y-6">
@@ -175,18 +135,18 @@ const DraPatricia = () => {
                   Criadora do Método Acne Control – Pele de Porcelana
                 </h3>
                 <p className="text-xs text-clinic-textSecondary font-light leading-relaxed">
-                  Protocolo exclusivo para tratamento da acne e recuperação da qualidade, uniformidade e saúde da pele.
+                  Meu protocolo exclusivo para tratamento da acne e recuperação da qualidade, uniformidade e saúde da pele.
                 </p>
               </div>
 
               <div className="space-y-4 pl-6 border-l border-clinic-gold/20">
                 <div className="space-y-1">
                   <h4 className="text-sm font-semibold text-clinic-textPrimary uppercase tracking-wider">Atendimento individualizado e personalizado</h4>
-                  <p className="text-xs text-clinic-textSecondary font-light">Análise facial rigorosa para desenhar o tratamento ideal a cada paciente.</p>
+                  <p className="text-xs text-clinic-textSecondary font-light">Realizo uma análise facial rigorosa para desenhar o tratamento ideal a cada paciente.</p>
                 </div>
                 <div className="space-y-1">
                   <h4 className="text-sm font-semibold text-clinic-textPrimary uppercase tracking-wider">Protocolos baseados em evidências científicas</h4>
-                  <p className="text-xs text-clinic-textSecondary font-light">Segurança em primeiro lugar, utilizando ativos e técnicas comprovadas.</p>
+                  <p className="text-xs text-clinic-textSecondary font-light">Coloco sua segurança em primeiro lugar, utilizando ativos e técnicas comprovadas.</p>
                 </div>
                 <div className="space-y-1">
                   <h4 className="text-sm font-semibold text-clinic-textPrimary uppercase tracking-wider">Mais de uma década de experiência clínica</h4>
