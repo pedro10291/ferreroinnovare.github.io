@@ -149,6 +149,68 @@ export const RequestDetailsDrawer: React.FC<RequestDetailsDrawerProps> = ({
             </div>
           </section>
 
+          
+          {/* Sessão: Origem do Contato */}
+          {clinical_data?.origin && (
+            <section>
+              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-clinic-gold" />
+                Rastreamento de Origem
+              </h3>
+              
+              <div className="bg-white border border-gray-100 rounded-xl shadow-sm divide-y divide-gray-100">
+                {(clinical_data.origin.reported || clinical_data.origin.reported_custom) && (
+                  <div className="p-4 bg-gray-50/50">
+                    <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">Origem Informada Pelo Usuário</p>
+                    <p className="text-sm text-gray-900 font-medium">
+                      {clinical_data.origin.reported_custom || clinical_data.origin.reported}
+                    </p>
+                  </div>
+                )}
+                
+                {(clinical_data.origin.utm_source || clinical_data.origin.utm_medium || clinical_data.origin.utm_campaign) && (
+                  <div className="p-4">
+                    <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Origem Técnica (UTM)</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      {clinical_data.origin.utm_source && (
+                        <div>
+                          <p className="text-xs text-gray-500">Source</p>
+                          <p className="text-sm text-gray-900">{clinical_data.origin.utm_source}</p>
+                        </div>
+                      )}
+                      {clinical_data.origin.utm_medium && (
+                        <div>
+                          <p className="text-xs text-gray-500">Medium</p>
+                          <p className="text-sm text-gray-900">{clinical_data.origin.utm_medium}</p>
+                        </div>
+                      )}
+                      {clinical_data.origin.utm_campaign && (
+                        <div className="col-span-2">
+                          <p className="text-xs text-gray-500">Campaign</p>
+                          <p className="text-sm text-gray-900">{clinical_data.origin.utm_campaign}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {clinical_data.origin.entry_page && (
+                  <div className="p-4">
+                    <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">Página de Entrada</p>
+                    <p className="text-sm text-gray-900 truncate">{clinical_data.origin.entry_page}</p>
+                  </div>
+                )}
+
+                {clinical_data.origin.referrer && (
+                  <div className="p-4">
+                    <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-semibold">Referrer</p>
+                    <p className="text-sm text-gray-900 truncate">{clinical_data.origin.referrer}</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* Sessão: Dados Clínicos */}
           <section>
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">

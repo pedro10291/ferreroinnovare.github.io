@@ -151,7 +151,7 @@ export const ProcedurePage = () => {
     <div className="min-h-screen bg-clinic-bg pt-24 md:pt-28 pb-10 md:pb-16">
       
       {/* Breadcrumbs */}
-      <div className="max-w-[1000px] mx-auto px-6 sm:px-8 lg:px-12 mb-4 md:mb-6">
+      <div className="max-w-[1000px] mx-auto px-5 sm:px-8 lg:px-12 mb-4 md:mb-6">
         <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] md:text-xs font-medium tracking-wider md:tracking-widest uppercase text-clinic-textSecondary">
           <Link to="/" className="hover:text-clinic-goldDark transition-colors">Início</Link>
           <span>/</span>
@@ -161,7 +161,7 @@ export const ProcedurePage = () => {
         </nav>
       </div>
 
-      <div className="max-w-[1000px] mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="max-w-[1000px] mx-auto px-5 sm:px-8 lg:px-12">
         
         {/* Hero Area */}
         <motion.div 
@@ -175,7 +175,7 @@ export const ProcedurePage = () => {
               <img 
                 src={procedure.image} 
                 alt={`Resultado do procedimento de ${procedure.title}`} 
-                className="w-full h-auto max-h-[55vh] md:max-h-[70vh] object-contain object-center"
+                className="w-full h-auto max-h-[45vh] md:max-h-[60vh] object-contain object-center"
               />
             </div>
           ) : (
@@ -188,11 +188,16 @@ export const ProcedurePage = () => {
           )}
 
           <div className="max-w-3xl">
-            <h1 className="text-[28px] sm:text-3xl md:text-5xl lg:text-6xl font-serif text-clinic-textPrimary leading-[1.1] mb-3 md:mb-4">
-              {procedure.title}
-            </h1>
+            <div className="flex flex-col mb-4 md:mb-6">
+              <span className="text-clinic-goldDark font-serif text-lg md:text-2xl mb-2 opacity-80">
+                {String(procedure.display_order).padStart(2, '0')}
+              </span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-clinic-textPrimary leading-[1.15]">
+                {procedure.title}
+              </h1>
+            </div>
             {procedure.short_description && (
-              <p className="text-[15px] sm:text-base md:text-xl text-clinic-textSecondary font-light leading-relaxed mb-5 md:mb-8 max-w-2xl">
+              <p className="text-[15px] sm:text-[17px] md:text-xl text-clinic-textSecondary font-light leading-[1.8] mb-8 md:mb-10 max-w-2xl">
                 {procedure.short_description}
               </p>
             )}
@@ -214,7 +219,7 @@ export const ProcedurePage = () => {
               className="mb-10 md:mb-14"
             >
               <h2 className="text-xs font-semibold tracking-widest uppercase text-clinic-textPrimary mb-3 md:mb-4">O Que É</h2>
-              <p className="text-base md:text-lg text-clinic-textSecondary font-light leading-relaxed whitespace-pre-line">
+              <p className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8] whitespace-pre-line">
                 {parsedDescription}
               </p>
             </motion.section>
@@ -279,7 +284,7 @@ export const ProcedurePage = () => {
                   {modalities[activeModalityIndex].differential && (
                     <div>
                       <span className="text-[9px] uppercase tracking-[0.2em] text-clinic-goldDark font-semibold block mb-1">Diferencial</span>
-                      <p className="text-xs md:text-sm text-clinic-textSecondary/90 font-light leading-relaxed">
+                      <p className="text-xs md:text-sm text-clinic-textSecondary/90 font-light leading-[1.8]">
                         {modalities[activeModalityIndex].differential}
                       </p>
                     </div>
@@ -314,7 +319,7 @@ export const ProcedurePage = () => {
               className="mb-10 md:mb-14"
             >
               <h2 className="text-xs font-semibold tracking-widest uppercase text-clinic-textPrimary mb-3 md:mb-4">Indicações</h2>
-              <p className="text-base md:text-lg text-clinic-textSecondary font-light leading-relaxed whitespace-pre-line">
+              <p className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8] whitespace-pre-line">
                 {procedure.indication}
               </p>
             </motion.section>
@@ -329,8 +334,8 @@ export const ProcedurePage = () => {
               <ul className="space-y-2 md:space-y-3">
                 {procedure.how_it_works.map((item, i) => (
                   <li key={i} className="flex items-start group">
-                    <span className="text-clinic-border group-hover:text-clinic-gold transition-colors duration-300 mr-4 mt-1 font-serif text-lg leading-none">○</span>
-                    <span className="text-base md:text-lg text-clinic-textSecondary font-light leading-relaxed">{item}</span>
+                    <span className="text-clinic-goldDark mr-4 mt-1 font-serif text-lg leading-none shrink-0">•</span>
+                    <span className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -343,11 +348,11 @@ export const ProcedurePage = () => {
               className="mb-10 md:mb-14"
             >
               <h2 className="text-xs font-semibold tracking-widest uppercase text-clinic-textPrimary mb-4">Benefícios Principais</h2>
-              <ul className="space-y-2 md:space-y-3">
+              <ul className="space-y-4 md:space-y-5">
                 {procedure.benefits.map((benefit, i) => (
                   <li key={i} className="flex items-start group">
-                    <span className="text-clinic-border group-hover:text-clinic-gold transition-colors duration-300 mr-4 mt-1 font-serif text-lg leading-none">○</span>
-                    <span className="text-base md:text-lg text-clinic-textSecondary font-light leading-relaxed">{benefit}</span>
+                    <span className="text-clinic-goldDark mr-4 mt-1 font-serif text-lg leading-none shrink-0">•</span>
+                    <span className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">{benefit}</span>
                   </li>
                 ))}
               </ul>
@@ -382,7 +387,7 @@ export const ProcedurePage = () => {
               className="mb-10 md:mb-14"
             >
               <h2 className="text-xs font-semibold tracking-widest uppercase text-clinic-textPrimary mb-4">Cuidados</h2>
-              <div className="border-t border-clinic-border">
+              <div className="space-y-3">
                 {procedure.pre_care && procedure.pre_care.length > 0 && (
                   <CareAccordion title="Antes do procedimento" items={procedure.pre_care} />
                 )}
@@ -397,7 +402,7 @@ export const ProcedurePage = () => {
           {((procedure.important_information && procedure.important_information.length > 0) || (procedure.contraindications && procedure.contraindications.length > 0)) && (
             <motion.section 
               initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-              className="mb-10 md:mb-14 p-6 md:p-8 bg-clinic-surface border border-clinic-border"
+              className="mb-12 md:mb-16 p-8 md:p-10 bg-clinic-surface border border-clinic-border/50 shadow-sm"
             >
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
                 <div className="w-10 h-10 flex items-center justify-center rounded-full border border-clinic-goldDark text-clinic-goldDark bg-clinic-goldDark/5 flex-shrink-0">
@@ -410,7 +415,7 @@ export const ProcedurePage = () => {
                 <div className="mb-8">
                   <ul className="space-y-3">
                     {procedure.contraindications.map((item, i) => (
-                      <li key={i} className="text-sm md:text-base text-clinic-textSecondary font-light flex items-start">
+                      <li key={i} className="text-[15px] md:text-base text-clinic-textSecondary font-light flex items-start leading-[1.8]">
                         <span className="mr-3 text-clinic-goldDark">•</span> {item}
                       </li>
                     ))}
@@ -421,7 +426,7 @@ export const ProcedurePage = () => {
               {procedure.important_information && procedure.important_information.length > 0 && (
                 <div className="space-y-4 pt-6 border-t border-clinic-border/50">
                   {procedure.important_information.map((item, i) => (
-                    <p key={i} className="text-sm md:text-base text-clinic-textSecondary font-light leading-relaxed italic">
+                    <p key={i} className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8] italic">
                       "{item}"
                     </p>
                   ))}

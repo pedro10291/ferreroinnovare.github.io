@@ -20,6 +20,7 @@ export interface FetchContactRequestsFilters {
   searchTerm?: string;
   status?: string;
   procedure?: string;
+  origin?: string;
 }
 
 export interface PaginatedResult<T> {
@@ -61,9 +62,10 @@ export const contactRequestsService = {
   ): Promise<PaginatedResult<ContactRequest>> {
     let query = supabase
       .from('contact_requests')
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
 
-    // Apply filters
+    // Apply DB filters
     if (filters?.status && filters.status !== 'all') {
       query = query.eq('status', filters.status);
     }
@@ -77,23 +79,81 @@ export const contactRequestsService = {
       query = query.or(`full_name.ilike.${term},email.ilike.${term},phone.ilike.${term}`);
     }
 
-    // Pagination
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-
-    query = query.order('created_at', { ascending: false }).range(from, to);
-
-    const { data, error, count } = await query;
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching contact requests:', error);
       throw error;
     }
 
+    let results = data as ContactRequest[];
+
+    // Origin Filter (Frontend side)
+    if (filters?.origin && filters.origin !== 'all') {
+      results = results.filter(req => {
+        const d = req.clinical_data;
+        if (!d || !d.origin) {
+          return filters.origin === 'Não informado';
+        }
+
+        const o = d.origin;
+        let originText = 'Não informado';
+        
+        if (o.reported_custom && o.reported_custom.trim() !== '') {
+          originText = o.reported_custom;
+        } else if (o.reported && o.reported !== 'Outro') {
+          originText = o.reported;
+        } else if (o.utm_source) {
+          const s = o.utm_source.toLowerCase();
+          if (s.includes('instagram')) originText = 'Instagram';
+          else if (s.includes('facebook')) originText = 'Facebook';
+          else if (s.includes('google')) originText = 'Google';
+          else if (s.includes('tiktok')) originText = 'TikTok';
+          else if (s.includes('whatsapp') || s.includes('wa.me')) originText = 'WhatsApp';
+          else originText = s.charAt(0).toUpperCase() + s.slice(1);
+        } else if (o.referrer) {
+          try {
+            const url = new URL(o.referrer);
+            const host = url.hostname.toLowerCase();
+            if (host.includes('instagram')) originText = 'Instagram';
+            else if (host.includes('facebook')) originText = 'Facebook';
+            else if (host.includes('google')) originText = 'Google';
+            else if (host.includes('tiktok')) originText = 'TikTok';
+            else if (host.includes('whatsapp') || host.includes('wa.me')) originText = 'WhatsApp';
+            else if (host.includes('youtube') || host.includes('youtu.be')) originText = 'YouTube';
+            else originText = url.hostname;
+          } catch (e) {
+            originText = o.referrer;
+          }
+        }
+        
+        // Normalização flexível
+        const normalizedItem = originText.toLowerCase().trim();
+        const normalizedFilter = filters.origin!.toLowerCase().trim();
+        
+        return normalizedItem.includes(normalizedFilter) || normalizedItem === normalizedFilter;
+      });
+    }
+
+    const count = results.length;
+
+    // Pagination
+    const from = (page - 1) * limit;
+    const to = from + limit;
+    const paginatedData = results.slice(from, to);
+
     return {
-      data: data as ContactRequest[],
-      count: count || 0
+      data: paginatedData,
+      count
     };
+  },
+
+  async fetchAllMetrics() {
+    const { data, error } = await supabase
+      .from('contact_requests')
+      .select('*');
+    if (error) throw error;
+    return data as ContactRequest[];
   },
 
   async updateStatus(id: string, newStatus: string): Promise<void> {

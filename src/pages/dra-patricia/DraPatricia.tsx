@@ -69,7 +69,7 @@ const DraPatricia = () => {
             >
               <div className="space-y-6 text-[15px] md:text-lg text-clinic-textSecondary font-light leading-relaxed">
                 <p>
-                  Sou Bacharel em Biomedicina e Graduada em Estética e Cosmética, atuando na área da estética desde 2014, unindo ciência, saúde e beleza em uma abordagem individualizada e baseada em evidências científicas.
+                  Bacharel em Biomedicina e Graduada em Estética e Cosmética, atuando na área da estética desde 2014, unindo ciência, saúde e beleza em uma abordagem individualizada e baseada em evidências científicas.
                 </p>
                 <p>
                   Ao longo da minha trajetória profissional, desenvolvi protocolos exclusivos e construí uma experiência clínica voltada ao rejuvenescimento facial, harmonização facial e promoção do envelhecimento saudável.

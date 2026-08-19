@@ -22,6 +22,7 @@ export default function ContactRequests() {
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [originFilter, setOriginFilter] = useState('all');
   const [procedureFilter, setProcedureFilter] = useState('all');
 
   // Drawer
@@ -43,6 +44,7 @@ export default function ContactRequests() {
       const { data, count } = await contactRequestsService.fetchContactRequests(page, limit, {
         searchTerm,
         status: statusFilter,
+        origin: originFilter,
         procedure: procedureFilter
       });
       setRequests(data);
@@ -145,6 +147,27 @@ export default function ContactRequests() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4">
+
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <select
+              value={originFilter}
+              onChange={(e) => { setOriginFilter(e.target.value); setPage(1); }}
+              className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-clinic-gold focus:border-transparent text-sm text-gray-700 min-w-[140px]"
+            >
+              <option value="all">Todas as origens</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Google">Google</option>
+              <option value="Facebook">Facebook</option>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="TikTok">TikTok</option>
+              <option value="YouTube">YouTube</option>
+              <option value="Indicação">Indicação</option>
+              <option value="Outro">Outro</option>
+              <option value="Não informado">Não informado</option>
+            </select>
+          </div>
+
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <select
@@ -201,6 +224,7 @@ export default function ContactRequests() {
                     <th className="px-6 py-4 font-medium">Cliente</th>
                     <th className="px-6 py-4 font-medium">Procedimento</th>
                     <th className="px-6 py-4 font-medium">Contato</th>
+                    <th className="px-6 py-4 font-medium">Origem</th>
                     <th className="px-6 py-4 font-medium">Status</th>
                     <th className="px-6 py-4 font-medium">Data</th>
                     <th className="px-6 py-4 font-medium text-right">Ações</th>
@@ -218,6 +242,11 @@ export default function ContactRequests() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">
                         {formatPhoneNumber(request.phone) || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          {getOriginText(request)}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <RequestStatusBadge status={request.status} />
@@ -315,3 +344,41 @@ export default function ContactRequests() {
     </div>
   );
 }
+
+
+export const getOriginText = (request: any) => {
+  const data = request.clinical_data;
+  if (!data || !data.origin) return 'Não informado';
+  
+  const o = data.origin;
+  let originText = 'Não informado';
+  
+  if (o.reported_custom && o.reported_custom.trim() !== '') {
+    originText = o.reported_custom;
+  } else if (o.reported && o.reported !== 'Outro') {
+    originText = o.reported;
+  } else if (o.utm_source) {
+    const s = o.utm_source.toLowerCase();
+    if (s.includes('instagram')) originText = 'Instagram';
+    else if (s.includes('facebook')) originText = 'Facebook';
+    else if (s.includes('google')) originText = 'Google';
+    else if (s.includes('tiktok')) originText = 'TikTok';
+    else if (s.includes('whatsapp') || s.includes('wa.me')) originText = 'WhatsApp';
+    else originText = s.charAt(0).toUpperCase() + s.slice(1);
+  } else if (o.referrer) {
+    try {
+      const url = new URL(o.referrer);
+      const host = url.hostname.toLowerCase();
+      if (host.includes('instagram')) originText = 'Instagram';
+      else if (host.includes('facebook')) originText = 'Facebook';
+      else if (host.includes('google')) originText = 'Google';
+      else if (host.includes('tiktok')) originText = 'TikTok';
+      else if (host.includes('whatsapp') || host.includes('wa.me')) originText = 'WhatsApp';
+      else if (host.includes('youtube') || host.includes('youtu.be')) originText = 'YouTube';
+      else originText = url.hostname;
+    } catch (e) {
+      originText = o.referrer;
+    }
+  }
+  return originText;
+};

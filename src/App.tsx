@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { ScrollToTop } from './components/ScrollToTop';
+import { Tracking } from './components/Tracking';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -27,6 +28,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+      <Tracking />
       <React.Suspense fallback={
         <div className="h-screen w-screen flex items-center justify-center bg-clinic-bg">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-clinic-gold"></div>

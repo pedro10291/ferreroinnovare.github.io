@@ -9,6 +9,7 @@ import { supabase } from '../../services/supabase';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Procedure } from '../../types/procedure';
 import { UNAVAILABLE_PROCEDURE_SLUGS } from '../../config/constants';
+import { getTrackingData } from '../../components/Tracking';
 import { generateProcedureBookingWhatsAppLink } from '../../utils/whatsapp';
 
 const requestSchema = z.object({
@@ -39,6 +40,8 @@ const requestSchema = z.object({
   name: z.string().min(3, 'Nome é obrigatório.'),
   phone: z.string().min(10, 'Telefone inválido.'),
   birthDate: z.string().min(1, 'Data de nascimento é obrigatória.'),
+  discovery_channel: z.string().optional(),
+  discovery_channel_other: z.string().optional(),
 });
 
 type RequestFormData = z.infer<typeof requestSchema>;
@@ -186,7 +189,7 @@ export const AnamnesisForm = () => {
     if (currentStep === 1) fieldsToValidate = ['desired_procedures', 'main_concerns', 'main_concerns_other'];
     if (currentStep === 2) fieldsToValidate = ['previous_procedures', 'previous_procedures_details', 'existing_fillers'];
     if (currentStep === 3) fieldsToValidate = ['health_conditions', 'health_condition_other', 'continuous_medication', 'continuous_medication_details', 'pregnancy_breastfeeding', 'allergies', 'allergies_details'];
-    if (currentStep === 4) fieldsToValidate = ['desired_result', 'consultation_expectation', 'name', 'phone', 'birthDate'];
+    if (currentStep === 4) fieldsToValidate = ['desired_result', 'consultation_expectation', 'name', 'phone', 'birthDate', 'discovery_channel', 'discovery_channel_other'];
     
     const isStepValid = await trigger(fieldsToValidate);
     if (isStepValid) {
@@ -272,6 +275,13 @@ export const AnamnesisForm = () => {
         desired_result: data.desired_result,
         consultation_expectation: data.consultation_expectation,
         birthDate: data.birthDate,
+
+        // Rastreamento de Origem
+        origin: {
+          reported: data.discovery_channel || null,
+          reported_custom: data.discovery_channel_other || null,
+          ...getTrackingData()
+        },
 
         // Chaves mapeadas explicitamente que a RPC do banco consome
         medicalHistory: formatMedicalHistory(),
@@ -720,6 +730,37 @@ export const AnamnesisForm = () => {
                       />
                       <p className="text-[10px] text-clinic-textSecondary/60 mt-1.5 uppercase tracking-wider font-light">Data de nascimento</p>
                     </div>
+                  </div>
+
+                  {/* Como nos conheceu */}
+                  <div className="space-y-4 pt-6">
+                    <label className="block text-clinic-textPrimary font-medium text-sm">Como você conheceu a Ferrer Innovare? (Opcional)</label>
+                    <div className="relative">
+                      <select
+                        {...register('discovery_channel')}
+                        className="w-full bg-transparent border border-clinic-border/60 rounded-none px-4 py-3 text-clinic-textPrimary text-sm font-light focus:outline-none focus:border-clinic-gold transition-colors appearance-none"
+                      >
+                        <option value="">Selecione uma opção</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Google">Google</option>
+                        <option value="TikTok">TikTok</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Indicação">Indicação</option>
+                        <option value="Já sou cliente">Já sou cliente</option>
+                        <option value="Outro">Outro</option>
+                      </select>
+                    </div>
+                    {watchAll.discovery_channel === 'Outro' && (
+                      <div className="mt-4">
+                        <label className="block text-clinic-textPrimary font-medium mb-2 text-sm">Qual?</label>
+                        <Input
+                          {...register('discovery_channel_other')}
+                          placeholder="Ex: Vi na rua, Evento, etc..."
+                          className="w-full bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
