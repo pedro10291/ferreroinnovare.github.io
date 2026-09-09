@@ -229,13 +229,13 @@ export const RequestDetailsDrawer: React.FC<RequestDetailsDrawerProps> = ({
                   </p>
                 </div>
               )}
-              {clinical_data?.medicalHistory && clinical_data.medicalHistory.length > 0 && (
+              {clinical_data?.medicalHistory && (
                 <div className="p-4">
                   <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Histórico médico (Legado)</p>
                   <div className="flex flex-wrap gap-2">
-                    {clinical_data.medicalHistory.map((item: string, idx: number) => (
+                    {Array.isArray(clinical_data.medicalHistory) ? clinical_data.medicalHistory.map((item: string, idx: number) => (
                       <span key={idx} className="px-2.5 py-1 bg-red-50 text-red-700 text-xs rounded-md">{item}</span>
-                    ))}
+                    )) : <span className="px-2.5 py-1 bg-red-50 text-red-700 text-xs rounded-md">{String(clinical_data.medicalHistory)}</span>}
                   </div>
                 </div>
               )}
@@ -257,13 +257,13 @@ export const RequestDetailsDrawer: React.FC<RequestDetailsDrawerProps> = ({
                   <p className="text-sm text-gray-900 font-medium text-red-600">{clinical_data.allergies}</p>
                 </div>
               )}
-              {clinical_data?.habits && clinical_data.habits.length > 0 && (
+              {clinical_data?.habits && (
                 <div className="p-4">
                   <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Hábitos (Legado)</p>
                   <div className="flex flex-wrap gap-2">
-                    {clinical_data.habits.map((item: string, idx: number) => (
+                    {Array.isArray(clinical_data.habits) ? clinical_data.habits.map((item: string, idx: number) => (
                       <span key={idx} className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">{item}</span>
-                    ))}
+                    )) : <span className="text-sm text-gray-900 whitespace-pre-line">{String(clinical_data.habits)}</span>}
                   </div>
                 </div>
               )}
@@ -275,28 +275,28 @@ export const RequestDetailsDrawer: React.FC<RequestDetailsDrawerProps> = ({
               )}
 
               {/* NEW PRE-CONSULTATION DATA */}
-              {clinical_data?.desired_procedures && clinical_data.desired_procedures.length > 0 && (
+              {clinical_data?.desired_procedures && (
                 <div className="p-4">
                   <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">O que busca</p>
                   <div className="space-y-1">
-                    {clinical_data.desired_procedures.map((item: string, idx: number) => (
+                    {Array.isArray(clinical_data.desired_procedures) ? clinical_data.desired_procedures.map((item: string, idx: number) => (
                       <p key={idx} className="text-sm text-gray-900 flex items-start gap-2">
                         <span className="text-clinic-gold">→</span> {item}
                       </p>
-                    ))}
+                    )) : <p className="text-sm text-gray-900 flex items-start gap-2"><span className="text-clinic-gold">→</span> {String(clinical_data.desired_procedures)}</p>}
                   </div>
                 </div>
               )}
 
-              {clinical_data?.main_concerns && clinical_data.main_concerns.length > 0 && (
+              {clinical_data?.main_concerns && (
                 <div className="p-4">
                   <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Principais Incômodos</p>
                   <div className="space-y-1">
-                    {clinical_data.main_concerns.map((item: string, idx: number) => (
+                    {Array.isArray(clinical_data.main_concerns) ? clinical_data.main_concerns.map((item: string, idx: number) => (
                       <p key={idx} className="text-sm text-gray-900 flex items-start gap-2">
                         <span className="text-clinic-gold">→</span> {item === 'Outro' && clinical_data.main_concerns_other ? `Outro: ${clinical_data.main_concerns_other}` : item}
                       </p>
-                    ))}
+                    )) : <p className="text-sm text-gray-900 flex items-start gap-2"><span className="text-clinic-gold">→</span> {String(clinical_data.main_concerns)}</p>}
                   </div>
                 </div>
               )}
@@ -322,15 +322,15 @@ export const RequestDetailsDrawer: React.FC<RequestDetailsDrawerProps> = ({
                 </div>
               )}
 
-              {clinical_data?.health_conditions && clinical_data.health_conditions.length > 0 && (
+              {clinical_data?.health_conditions && (
                 <div className="p-4">
                   <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Informações de Saúde</p>
                   <div className="space-y-1">
-                    {clinical_data.health_conditions.map((item: string, idx: number) => (
+                    {Array.isArray(clinical_data.health_conditions) ? clinical_data.health_conditions.map((item: string, idx: number) => (
                       <p key={idx} className="text-sm text-gray-900 flex items-start gap-2">
                         <span className="text-clinic-gold">→</span> {item === 'Outra' && clinical_data.health_condition_other ? `Outra: ${clinical_data.health_condition_other}` : item}
                       </p>
-                    ))}
+                    )) : <p className="text-sm text-gray-900 flex items-start gap-2"><span className="text-clinic-gold">→</span> {String(clinical_data.health_conditions)}</p>}
                   </div>
                 </div>
               )}

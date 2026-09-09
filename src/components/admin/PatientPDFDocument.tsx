@@ -1,11 +1,7 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { Patient, Anamnesis, PatientRecord } from '../../types/patient';
 import { Appointment } from '../../services/appointmentsService';
-
-// Registra fontes se necessário (já registradas na inicialização do react-pdf globalmente,
-// mas declaramos fallback nativo standard do PDF para evitar quebras)
-// O react-pdf aceita fontes padrão como Helvetica, Times-Roman por padrão de forma segura.
 
 const formatPhone = (phone: string | null): string => {
   if (!phone) return 'Não informado';
@@ -19,8 +15,9 @@ const formatPhone = (phone: string | null): string => {
   return phone;
 };
 
+// Formata e limpa os valores de texto vindos do banco
 const formatText = (value: any): string => {
-  if (!value) return 'Não informado.';
+  if (value === null || value === undefined) return '';
   
   let parsedValue = value;
   
@@ -37,7 +34,7 @@ const formatText = (value: any): string => {
 
   const formatObject = (obj: any): string => {
     if (Array.isArray(obj)) {
-      return obj.length > 0 ? obj.join(', ') : 'Não informado';
+      return obj.length > 0 ? obj.join(', ') : '';
     }
     if (obj && typeof obj === 'object' && 'answer' in obj) {
       const ans = obj.answer;
@@ -59,31 +56,68 @@ const formatText = (value: any): string => {
     text = String(parsedValue).trim();
   }
 
-  if (text.length === 0 || text === 'null' || text === 'undefined') return 'Não informado.';
+  // Remove rótulos sujos legados
+  text = text.replace(/^Resultado desejado:\s*/i, '');
+  text = text.replace(/^Expectativa:\s*/i, '');
+  text = text.replace(/^Hábitos:\s*/i, '');
+  text = text.replace(/^Doença Autoimune:\s*/i, '');
+  
+  if (text.length === 0 || text === 'null' || text === 'undefined' || text === 'Não informado.' || text === 'Não informado') return '';
   
   let formatted = text.charAt(0).toUpperCase() + text.slice(1);
-  if (!formatted.endsWith('.')) {
+  if (!formatted.endsWith('.') && formatted.length > 3) {
     formatted += '.';
   }
   return formatted;
 };
 
+// Combina dados do formulário e da avaliação profissional de forma inteligente
+const combineData = (val1: any, val2: any): string => {
+  const t1 = formatText(val1);
+  const t2 = formatText(val2);
+  
+  if (!t1 && !t2) return '';
+  if (t1 && !t2) return t1;
+  if (!t1 && t2) return t2;
+  
+  // Se forem muito parecidos, retorna o mais detalhado
+  if (t1.toLowerCase().includes(t2.toLowerCase())) return t1;
+  if (t2.toLowerCase().includes(t1.toLowerCase())) return t2;
+  
+  // Se forem diferentes, combina de forma elegante
+  return `${t1} | ${t2}`;
+};
+
 const styles = StyleSheet.create({
   page: {
     paddingTop: 40,
-    paddingBottom: 65,
-    paddingHorizontal: 40,
+    paddingBottom: 60,
+    paddingHorizontal: 45,
     fontFamily: 'Helvetica',
-    backgroundColor: '#FCFBF9'
+    backgroundColor: '#FFFFFF', // Fundo claro e limpo
+  },
+  watermarkContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: -1,
+  },
+  watermarkImage: {
+    width: 250,
+    opacity: 0.05,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: '#B69A54',
     paddingBottom: 15,
-    marginBottom: 30
+    marginBottom: 25
   },
   headerLeft: {
     flex: 1
@@ -93,68 +127,81 @@ const styles = StyleSheet.create({
   },
   documentType: {
     fontFamily: 'Times-Roman',
-    fontSize: 10,
+    fontSize: 12,
     color: '#B69A54',
     textTransform: 'uppercase',
-    letterSpacing: 1
+    letterSpacing: 2
   },
   documentSubtitle: {
-    fontSize: 8,
-    color: '#999999',
-    marginTop: 2
+    fontSize: 9,
+    color: '#666666',
+    marginTop: 4,
+    letterSpacing: 0.5
   },
   patientNameBlock: {
-    marginBottom: 30,
-    alignItems: 'center'
+    marginBottom: 25,
   },
   patientName: {
     fontFamily: 'Times-Roman',
-    fontSize: 24,
+    fontSize: 22,
     color: '#2C363F',
-    marginBottom: 8,
-    textAlign: 'center'
+    marginBottom: 6,
   },
   patientMeta: {
     fontSize: 9,
     color: '#666666',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    lineHeight: 1.5
   },
   patientMetaItem: {
-    marginHorizontal: 4
+    marginRight: 6
   },
   section: {
-    marginBottom: 25,
-    wrap: true
+    marginBottom: 15,
+    wrap: false
   },
   sectionTitle: {
     fontFamily: 'Times-Roman',
-    fontSize: 14,
+    fontSize: 11,
     color: '#B69A54',
     borderBottomWidth: 0.5,
     borderBottomColor: '#E6DFD3',
     paddingBottom: 4,
-    marginBottom: 12,
+    marginBottom: 10,
     textTransform: 'uppercase',
     letterSpacing: 1
   },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 4,
+  },
   block: {
-    marginBottom: 10,
+    marginBottom: 8,
+    marginRight: 15,
+    flex: 1,
+    minWidth: '45%',
+    wrap: false
+  },
+  blockFull: {
+    marginBottom: 8,
+    width: '100%',
     wrap: false
   },
   blockLabel: {
-    fontSize: 9,
+    fontSize: 8,
     color: '#999999',
     textTransform: 'uppercase',
     marginBottom: 2,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    letterSpacing: 0.5
   },
   blockValue: {
     fontSize: 10,
     color: '#2C363F',
-    lineHeight: 1.5
+    lineHeight: 1.4
   },
   // Tabela Histórico
   table: {
@@ -163,43 +210,45 @@ const styles = StyleSheet.create({
   },
   tableHeaderRow: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: '#B69A54',
-    paddingBottom: 5,
-    marginBottom: 8
+    paddingBottom: 4,
+    marginBottom: 6
   },
   tableHeaderCell: {
     fontSize: 8,
     color: '#B69A54',
     fontWeight: 'bold',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    letterSpacing: 0.5
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
-    borderBottomColor: '#E6DFD3',
-    paddingVertical: 8,
+    borderBottomColor: '#F0EBE1',
+    paddingVertical: 6,
     wrap: false
   },
   tableCellDate: { width: '15%', fontSize: 9, color: '#666666' },
-  tableCellProc: { width: '25%', fontSize: 9, color: '#2C363F', fontWeight: 'bold' },
+  tableCellProc: { width: '30%', fontSize: 9, color: '#2C363F', fontWeight: 'bold' },
   tableCellProf: { width: '20%', fontSize: 9, color: '#666666' },
-  tableCellObs: { width: '40%', fontSize: 9, color: '#2C363F', lineHeight: 1.4 },
+  tableCellObs: { width: '35%', fontSize: 9, color: '#2C363F', lineHeight: 1.4 },
   
   footer: {
     position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
+    bottom: 25,
+    left: 45,
+    right: 45,
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 0.5,
     borderTopColor: '#E6DFD3',
-    paddingTop: 10
+    paddingTop: 8
   },
   footerText: {
     fontSize: 8,
-    color: '#999999'
+    color: '#999999',
+    fontFamily: 'Helvetica',
   }
 });
 
@@ -211,6 +260,16 @@ interface PatientPDFProps {
   originRequest?: any | null;
 }
 
+const Block = ({ label, value, fullWidth = false }: { label: string, value: string, fullWidth?: boolean }) => {
+  if (!value) return null;
+  return (
+    <View style={fullWidth ? styles.blockFull : styles.block}>
+      <Text style={styles.blockLabel}>{label}</Text>
+      <Text style={styles.blockValue}>{value}</Text>
+    </View>
+  );
+};
+
 export const PatientPDFDocument: React.FC<PatientPDFProps> = ({ 
   patient, 
   anamnesis, 
@@ -218,9 +277,41 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({
   appointments, 
   originRequest 
 }) => {
+  const cData = originRequest?.clinical_data || {};
+  
+  const vObjective = formatText(cData.desired_procedures || originRequest?.procedure_interest);
+  const vConcerns = formatText(
+    cData.main_concerns?.map((item: string) => 
+      item === 'Outro' && cData.main_concerns_other 
+        ? `Outro: ${cData.main_concerns_other}` 
+        : item
+    )
+  );
+  
+  // Os labels podem estar sujos no campo, usamos fallback para a chave de expectativa 
+  const vResult = formatText(cData.desired_result) || formatText(cData.habits); 
+  const vExpectation = formatText(cData.consultation_expectation) || formatText(cData.habits);
+  
+  const vHealth = combineData(anamnesis?.relevant_diseases, cData.health_conditions?.map((item: string) => 
+    item === 'Outra' && cData.health_condition_other ? `Outra: ${cData.health_condition_other}` : item
+  ));
+  const vAllergies = combineData(anamnesis?.allergies, cData.allergies);
+  const vMeds = combineData(anamnesis?.medications, cData.continuous_medication);
+  const vPregnancy = formatText(cData.pregnancy_breastfeeding);
+  
+  const vPrevProc = combineData(anamnesis?.previous_procedures, cData.previous_procedures);
+  const vFillers = formatText(cData.existing_fillers);
+  
+  const vNotes = formatText(anamnesis?.professional_notes);
+
   return (
     <Document>
       <Page size="A4" style={styles.page} wrap>
+        
+        {/* MARCA D'ÁGUA DE FUNDO (todas as páginas) */}
+        <View style={styles.watermarkContainer} fixed>
+          <Image src="/logo.png" style={styles.watermarkImage} />
+        </View>
         
         {/* CABEÇALHO */}
         <View style={styles.header} fixed>
@@ -233,147 +324,61 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({
           </View>
         </View>
 
-        {/* IDENTIFICAÇÃO DO PACIENTE */}
+        {/* 1. DADOS DO PACIENTE */}
         <View style={styles.patientNameBlock}>
           <Text style={styles.patientName}>{patient.full_name}</Text>
           <View style={styles.patientMeta}>
-            <Text style={styles.patientMetaItem}>{formatPhone(patient.phone)}</Text>
-            <Text style={styles.patientMetaItem}> • </Text>
-            <Text style={styles.patientMetaItem}>{patient.email || 'E-mail não informado'}</Text>
-            <Text style={styles.patientMetaItem}> • </Text>
-            <Text style={styles.patientMetaItem}>Nasc: {patient.birth_date ? new Date(patient.birth_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Não informado'}</Text>
-            <Text style={styles.patientMetaItem}> • </Text>
-            <Text style={styles.patientMetaItem}>CPF: {patient.cpf || 'Não informado'}</Text>
+            <Text style={styles.patientMetaItem}>Tel: {formatPhone(patient.phone)} • </Text>
+            {patient.email && <Text style={styles.patientMetaItem}>E-mail: {patient.email} • </Text>}
+            {patient.birth_date && <Text style={styles.patientMetaItem}>Nasc: {new Date(patient.birth_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} • </Text>}
+            {patient.cpf && <Text style={styles.patientMetaItem}>CPF: {patient.cpf}</Text>}
           </View>
         </View>
 
-        {/* ANAMNESE */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Anamnese Atual</Text>
-          {anamnesis ? (
-            <>
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Doenças Relevantes</Text>
-                <Text style={styles.blockValue}>{formatText(anamnesis.relevant_diseases)}</Text>
-              </View>
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Alergias</Text>
-                <Text style={styles.blockValue}>{formatText(anamnesis.allergies)}</Text>
-              </View>
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Medicamentos em Uso</Text>
-                <Text style={styles.blockValue}>{formatText(anamnesis.medications)}</Text>
-              </View>
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Procedimentos Anteriores</Text>
-                <Text style={styles.blockValue}>{formatText(anamnesis.previous_procedures)}</Text>
-              </View>
-              {anamnesis.professional_notes && (
-                <View style={styles.block}>
-                  <Text style={styles.blockLabel}>Observações Profissionais</Text>
-                  <Text style={styles.blockValue}>{formatText(anamnesis.professional_notes)}</Text>
-                </View>
-              )}
-            </>
-          ) : (
-            <Text style={styles.blockValue}>Nenhuma anamnese preenchida até o momento.</Text>
-          )}
-        </View>
-
-        {/* PRÉ-CONSULTA RÁPIDA (Exibida dinamicamente se o paciente se originou de uma pré-consulta) */}
-        {originRequest?.clinical_data && (
+        {/* 2. PRÉ-CONSULTA */}
+        {(vObjective || vConcerns || vResult || vExpectation) && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Pré-Consulta Rápida</Text>
-            
-            {originRequest.clinical_data.desired_procedures && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Objetivo / Procedimentos de Interesse</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.desired_procedures)}</Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.main_concerns && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Principais Incômodos</Text>
-                <Text style={styles.blockValue}>
-                  {formatText(
-                    originRequest.clinical_data.main_concerns.map((item: string) => 
-                      item === 'Outro' && originRequest.clinical_data.main_concerns_other 
-                        ? `Outro: ${originRequest.clinical_data.main_concerns_other}` 
-                        : item
-                    )
-                  )}
-                </Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.previous_procedures && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Histórico de Procedimentos</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.previous_procedures)}</Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.existing_fillers && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Preenchimentos / Produtos Existentes</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.existing_fillers)}</Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.health_conditions && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Condições de Saúde</Text>
-                <Text style={styles.blockValue}>
-                  {formatText(
-                    originRequest.clinical_data.health_conditions.map((item: string) => 
-                      item === 'Outra' && originRequest.clinical_data.health_condition_other 
-                        ? `Outra: ${originRequest.clinical_data.health_condition_other}` 
-                        : item
-                    )
-                  )}
-                </Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.continuous_medication && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Medicamentos de Uso Contínuo</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.continuous_medication)}</Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.pregnancy_breastfeeding && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Gestação / Amamentação</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.pregnancy_breastfeeding)}</Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.allergies && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Alergias</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.allergies)}</Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.desired_result && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Expectativa de Resultado</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.desired_result)}</Text>
-              </View>
-            )}
-
-            {originRequest.clinical_data.consultation_expectation && (
-              <View style={styles.block}>
-                <Text style={styles.blockLabel}>Expectativa da Avaliação</Text>
-                <Text style={styles.blockValue}>{formatText(originRequest.clinical_data.consultation_expectation)}</Text>
-              </View>
-            )}
+            <Text style={styles.sectionTitle}>Pré-Consulta</Text>
+            <View style={styles.row}>
+              <Block label="Objetivo / Procedimento de Interesse" value={vObjective} fullWidth />
+              <Block label="Principais Incômodos" value={vConcerns} fullWidth />
+              <Block label="Resultado Desejado" value={vResult} />
+              <Block label="Expectativa da Avaliação" value={vExpectation} />
+            </View>
           </View>
         )}
 
-        {/* HISTÓRICO DE ATENDIMENTOS */}
+        {/* 3. HISTÓRICO CLÍNICO */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Histórico Clínico</Text>
+          <View style={styles.row}>
+            <Block label="Condições de Saúde" value={vHealth || 'Não informado'} fullWidth />
+            <Block label="Alergias" value={vAllergies || 'Não possui alergias registradas'} fullWidth />
+            <Block label="Medicamentos de Uso Contínuo" value={vMeds || 'Não utiliza medicamentos'} fullWidth />
+            <Block label="Gestação / Amamentação" value={vPregnancy || 'Não'} />
+          </View>
+        </View>
+
+        {/* 4. HISTÓRICO ESTÉTICO */}
+        {(vPrevProc || vFillers) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Histórico Estético</Text>
+            <View style={styles.row}>
+              <Block label="Procedimentos Anteriores" value={vPrevProc} fullWidth />
+              <Block label="Preenchimentos / Produtos Existentes" value={vFillers} fullWidth />
+            </View>
+          </View>
+        )}
+
+        {/* 5. OBSERVAÇÕES */}
+        {vNotes && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Observações Profissionais</Text>
+            <Block label="Anotações" value={vNotes} fullWidth />
+          </View>
+        )}
+
+        {/* 6. HISTÓRICO DE ATENDIMENTOS */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Histórico de Atendimentos</Text>
           
@@ -381,9 +386,9 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({
             <View style={styles.table}>
               <View style={styles.tableHeaderRow} fixed>
                 <Text style={[styles.tableHeaderCell, { width: '15%' }]}>Data</Text>
-                <Text style={[styles.tableHeaderCell, { width: '25%' }]}>Procedimento</Text>
+                <Text style={[styles.tableHeaderCell, { width: '30%' }]}>Procedimento</Text>
                 <Text style={[styles.tableHeaderCell, { width: '20%' }]}>Profissional</Text>
-                <Text style={[styles.tableHeaderCell, { width: '40%' }]}>Observações</Text>
+                <Text style={[styles.tableHeaderCell, { width: '35%' }]}>Observações</Text>
               </View>
               
               {records.map(record => (

@@ -52,25 +52,45 @@ export const patientsService = {
    * falls back to soft-delete (active = false) if relationships exist.
    */
   async deletePatient(id: string): Promise<void> {
+    // Pre-check for dependencies to avoid HTTP 409 Conflict
+    const [
+      { count: reqCount },
+      { count: appCount },
+      { count: recCount },
+      { count: anaCount }
+    ] = await Promise.all([
+      supabase.from('contact_requests').select('id', { count: 'exact', head: true }).eq('converted_patient_id', id),
+      supabase.from('appointments').select('id', { count: 'exact', head: true }).eq('patient_id', id),
+      supabase.from('patient_records').select('id', { count: 'exact', head: true }).eq('patient_id', id),
+      supabase.from('anamnesis').select('id', { count: 'exact', head: true }).eq('patient_id', id)
+    ]);
+
+    const hasDependencies = (reqCount && reqCount > 0) || (appCount && appCount > 0) || (recCount && recCount > 0) || (anaCount && anaCount > 0);
+
+    if (hasDependencies) {
+      throw new Error('HAS_DEPENDENCIES');
+    }
+
     // 1. Tenta exclusão física (seguro para dados sem relacionamentos/FKs)
     const { error: deleteError } = await supabase
       .from('patients')
       .delete()
       .eq('id', id);
 
-    // 2. Se houver erro de Foreign Key (ex: tem appointments, anamnesis, etc), faz soft-delete
     if (deleteError) {
-      if (deleteError.code === '23503') {
-        const { error: updateError } = await supabase
-          .from('patients')
-          .update({ active: false })
-          .eq('id', id);
-          
-        if (updateError) throw updateError;
-      } else {
-        throw deleteError;
-      }
+      throw deleteError;
     }
+  },
+
+  /**
+   * Toggles the active status of a patient (Soft Delete / Unarchive)
+   */
+  async togglePatientStatus(id: string, active: boolean): Promise<void> {
+    const { error } = await supabase
+      .from('patients')
+      .update({ active })
+      .eq('id', id);
+    if (error) throw error;
   },
 
   /**
@@ -116,8 +136,7 @@ export const patientsService = {
   },
 
   /**
-   * Fetches patient appointments, ordering by scheduled_at ascending to show future first.
-   * To separate history from upcoming, we will do it on the client side based on status or date.
+   * Fetches the patient's appointments
    */
   async fetchPatientAppointments(patientId: string): Promise<Appointment[]> {
     const { data, error } = await supabase
@@ -142,7 +161,9 @@ export const patientsService = {
       .from('contact_requests')
       .select('*')
       .eq('converted_patient_id', patientId)
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     // If it fails because of zero rows, it's fine. Other errors we might want to log.
     if (error && error.code !== 'PGRST116') {

@@ -28,7 +28,11 @@ export const Patients = () => {
       fetchPatients(); // Atualiza a listagem automaticamente
     } catch (err: any) {
       console.error('Erro ao excluir paciente:', err);
-      setDeleteError('Não foi possível excluir o paciente. Pode haver dados relacionados que impedem a exclusão.');
+      if (err.message === 'HAS_DEPENDENCIES') {
+        setDeleteError('Este paciente possui registros vinculados (agendamentos, anamnese, etc.) e não pode ser excluído no momento.');
+      } else {
+        setDeleteError('Não foi possível excluir o paciente. Pode haver dados relacionados que impedem a exclusão.');
+      }
     } finally {
       setIsDeleting(false);
     }

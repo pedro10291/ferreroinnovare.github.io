@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +6,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (isOpen && navRef.current && !navRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (isOpen && event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen]);
 
   const navLinks = [
     { name: 'Início', path: '/' },
@@ -15,7 +45,7 @@ export const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed w-full z-50 bg-clinic-bg/95 backdrop-blur-md border-b border-clinic-border/60 transition-all duration-300">
+    <nav ref={navRef} className="fixed w-full z-50 bg-clinic-bg/95 backdrop-blur-md border-b border-clinic-border/60 transition-all duration-300">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
         <div className="flex justify-between items-center h-[70px] md:h-[90px]">
           

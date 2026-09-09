@@ -118,7 +118,8 @@ export const AnamnesisForm = () => {
   const [searchParams] = useSearchParams();
   const procedureSlug = searchParams.get('procedimento');
   const [selectedProcedure, setSelectedProcedure] = useState<Procedure | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -156,7 +157,74 @@ export const AnamnesisForm = () => {
     }
   });
 
+
   const watchAll = watch();
+
+  const handleNext = (nextId) => {
+    setActiveStep(nextId);
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const stepElement = document.getElementById(`step-${activeStep}`);
+      if (stepElement) {
+        // Calculate offset considering fixed header
+        const y = stepElement.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 150); // wait slightly for layout animations to start
+    return () => clearTimeout(timeoutId);
+  }, [activeStep]);
+
+  const renderStep = (
+    id,
+    question,
+    summary,
+    isAnswered,
+    contentNode
+  ) => {
+    const isActive = activeStep === id;
+    const isPast = activeStep > id || (isAnswered && !isActive);
+
+    if (!isActive && !isPast) return null;
+
+    if (!isActive && isPast) {
+      return (
+        <div key={id} id={`step-${id}-collapsed`} onClick={() => setActiveStep(id)}
+          className="py-5 border-b border-clinic-border/60 flex items-center justify-between cursor-pointer group"
+        >
+          <div className="flex items-center gap-4">
+            <span className="font-serif text-lg text-clinic-gold">{id.toString().padStart(2, '0')}</span>
+            <span className="text-sm font-light text-clinic-textPrimary group-hover:text-clinic-gold transition-colors line-clamp-1 max-w-[220px] md:max-w-md">
+              ✓ {summary}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <motion.div key={id} id={`step-${id}`} layout initial={{ opacity: 0, y: 10 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        exit={{ opacity: 0, height: 0 }}
+        className="py-8 border-b border-clinic-border/60 space-y-6"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <span className="font-serif text-2xl text-clinic-gold">{id.toString().padStart(2, '0')}</span>
+          <span className="text-[10px] tracking-[0.2em] text-clinic-textSecondary uppercase font-semibold">
+            Progresso
+          </span>
+        </div>
+        
+        <h3 className="text-xl md:text-2xl font-serif text-clinic-textPrimary leading-tight mb-8">
+          {question}
+        </h3>
+        
+        {contentNode}
+        
+      </motion.div>
+    );
+  };
 
   useEffect(() => {
     const fetchSelectedProcedure = async () => {
@@ -184,24 +252,6 @@ export const AnamnesisForm = () => {
     fetchSelectedProcedure();
   }, [procedureSlug, setValue]);
 
-  const nextStep = async () => {
-    let fieldsToValidate: any[] = [];
-    if (currentStep === 1) fieldsToValidate = ['desired_procedures', 'main_concerns', 'main_concerns_other'];
-    if (currentStep === 2) fieldsToValidate = ['previous_procedures', 'previous_procedures_details', 'existing_fillers'];
-    if (currentStep === 3) fieldsToValidate = ['health_conditions', 'health_condition_other', 'continuous_medication', 'continuous_medication_details', 'pregnancy_breastfeeding', 'allergies', 'allergies_details'];
-    if (currentStep === 4) fieldsToValidate = ['desired_result', 'consultation_expectation', 'name', 'phone', 'birthDate', 'discovery_channel', 'discovery_channel_other'];
-    
-    const isStepValid = await trigger(fieldsToValidate);
-    if (isStepValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, steps.length));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const prevStep = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   const onSubmit = async (data: RequestFormData) => {
     setIsSubmitting(true);
@@ -316,6 +366,7 @@ export const AnamnesisForm = () => {
     }
   };
 
+
   if (submitted) {
     return (
       <div className="min-h-[80vh] pt-32 pb-16 px-6 bg-[#FCFBF9] flex flex-col items-center justify-center">
@@ -331,7 +382,7 @@ export const AnamnesisForm = () => {
           </p>
           <div className="pt-8 flex flex-col items-center gap-4">
             <a
-              href={generateProcedureBookingWhatsAppLink(selectedProcedure?.title || watchAll.desired_procedures[0])}
+              href={generateProcedureBookingWhatsAppLink(selectedProcedure?.title || watchAll.desired_procedures?.[0])}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-8 h-12 bg-clinic-textPrimary hover:bg-clinic-goldDark text-white rounded-none uppercase tracking-widest text-xs transition-colors duration-300"
@@ -349,459 +400,515 @@ export const AnamnesisForm = () => {
 
   return (
     <div className="min-h-screen pt-28 md:pt-36 pb-36 md:pb-40 px-6 bg-[#FCFBF9]">
-      <div className="max-w-[620px] mx-auto">
+      <div className="max-w-[620px] mx-auto pb-[60vh]">
         
-        {/* Header */}
         <div className="text-center mb-16">
           <span className="text-[10px] uppercase tracking-[0.25em] text-clinic-gold font-bold mb-4 block">Pré-Consulta</span>
           <h2 className="text-3xl md:text-4xl font-serif text-clinic-dark mb-4">Ferrer Innovare Clinic</h2>
           <p className="text-clinic-textSecondary font-light text-sm max-w-sm mx-auto leading-relaxed">
-            Leva menos de 2 minutos. Suas respostas nos ajudam a entender suas necessidades e preparar sua avaliação.
+            Responda de forma rápida. Suas escolhas guiarão nosso atendimento.
           </p>
         </div>
 
-        {/* Editorial Progress Bar */}
-        <div className="mb-16 border-b border-clinic-border/60 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div className="flex items-center gap-3">
-            <span className="font-serif text-2xl text-clinic-gold">{currentStep.toString().padStart(2, '0')}</span>
-            <span className="text-[10px] tracking-[0.2em] text-clinic-textSecondary uppercase font-semibold">
-              {steps[currentStep-1].title}
-            </span>
-          </div>
-          <div className="w-full sm:w-32 h-[1px] bg-clinic-border/40 relative overflow-hidden mt-2 sm:mt-0">
-            <div 
-              className="absolute left-0 top-0 h-full bg-clinic-gold transition-all duration-500 ease-out"
-              style={{ width: `${(currentStep / steps.length) * 100}%` }}
-            />
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit(onSubmit)}>
-          <AnimatePresence mode="wait">
+          <div className="flex flex-col border-t border-clinic-border/60">
             
-            {/* ETAPA 1 */}
-            {currentStep === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-12"
-              >
+            {renderStep(
+              1,
+              'Qual procedimento ou resultado você está buscando?',
+              watchAll.desired_procedures?.join(', ') || '',
+              watchAll.desired_procedures?.length > 0,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="desired_procedures"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      options={[
+                        ...(selectedProcedure ? [selectedProcedure.title] : []),
+                        'Rejuvenescimento facial',
+                        'Botox',
+                        'Preenchimento',
+                        'Fios de PDO',
+                        'Bioestimulador de colágeno',
+                        'Tratamento da pele/manchas',
+                        'Micropigmentação',
+                        'Laser/despigmentação',
+                        'Ainda não sei, quero orientação'
+                      ]}
+                      value={field.value || []}
+                      onChange={(val) => {
+    if (val.includes('Ainda não sei, quero orientação')) {
+      field.onChange(['Ainda não sei, quero orientação']);
+    } else {
+      field.onChange(val.filter(v => v !== 'Ainda não sei, quero orientação'));
+    }
+    handleNext(2);
+  }}
+                    />
+                  )}
+                />
+                {errors.desired_procedures && <p className="text-red-500 text-xs mt-1">{errors.desired_procedures.message}</p>}
+                
+              </div>
+            )}
+
+            {renderStep(
+              2,
+              'O que mais incomoda você atualmente?',
+              watchAll.main_concerns?.join(', ') || '',
+              watchAll.main_concerns?.length > 0,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="main_concerns"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      options={[
+                        'Rugas ou linhas de expressão',
+                        'Flacidez',
+                        'Falta de contorno facial',
+                        'Falta de volume',
+                        'Olheiras',
+                        'Manchas/pigmentação',
+                        'Assimetria',
+                        'Quero melhorar minha aparência de forma geral',
+                        'Outro'
+                      ]}
+                      value={field.value || []}
+                      onChange={(val) => {
+    field.onChange(val);
+    if (!val.includes('Outro')) handleNext(3);
+  }}
+                    />
+                  )}
+                />
+                {errors.main_concerns && <p className="text-red-500 text-xs mt-1">{errors.main_concerns.message}</p>}
+                {watchAll.main_concerns?.includes('Outro') && (
+                  <div className="mt-4 flex items-end gap-2">
+    <div className="flex-1">
+      <Input 
+        placeholder="Especifique..."
+        {...register('main_concerns_other')}
+        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
+        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleNext(3))}
+      />
+    </div>
+    <button type="button" onClick={() => handleNext(3)} className="bg-clinic-gold text-white px-4 py-2.5 text-[10px] tracking-widest uppercase hover:bg-clinic-goldDark transition-colors flex-shrink-0">OK</button>
+  </div>
+                )}
+                
+              </div>
+            )}
+
+            {renderStep(
+              3,
+              'Você já realizou algum procedimento estético?',
+              watchAll.previous_procedures || '',
+              !!watchAll.previous_procedures,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="previous_procedures"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      type="radio"
+                      options={[
+                        'Nunca',
+                        'Botox',
+                        'Preenchimento',
+                        'Bioestimulador',
+                        'Fios',
+                        'Outro'
+                      ]}
+                      value={field.value ? [field.value] : []}
+                      onChange={(val) => {
+    const selected = val[val.length - 1] || '';
+    field.onChange(selected);
+    if (!['Botox', 'Preenchimento', 'Bioestimulador', 'Fios', 'Outro'].includes(selected)) handleNext(4);
+  }}
+                    />
+                  )}
+                />
+                {errors.previous_procedures && <p className="text-red-500 text-xs mt-1">{errors.previous_procedures.message}</p>}
+                {['Botox', 'Preenchimento', 'Bioestimulador', 'Fios', 'Outro'].includes(watchAll.previous_procedures || '') && (
+                  <div className="mt-4 flex items-end gap-2">
+    <div className="flex-1">
+      <Input 
+        placeholder="Quais procedimentos e quando? (Aproximadamente)"
+        {...register('previous_procedures_details')}
+        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
+        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleNext(4))}
+      />
+    </div>
+    <button type="button" onClick={() => handleNext(4)} className="bg-clinic-gold text-white px-4 py-2.5 text-[10px] tracking-widest uppercase hover:bg-clinic-goldDark transition-colors flex-shrink-0">OK</button>
+  </div>
+                )}
+                
+              </div>
+            )}
+
+            {renderStep(
+              4,
+              'Você possui algum preenchimento ou outro produto aplicado na região que deseja tratar?',
+              watchAll.existing_fillers || '',
+              !!watchAll.existing_fillers,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="existing_fillers"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      type="radio"
+                      options={[
+                        'Não possuo preenchimento',
+                        'Sim, Ácido Hialurônico',
+                        'Sim, PMMA ou silicone',
+                        'Não tenho certeza do produto'
+                      ]}
+                      value={field.value ? [field.value] : []}
+                      onChange={(val) => {
+                        field.onChange(val[val.length - 1] || '');
+                        handleNext(5);
+                      }}
+                    />
+                  )}
+                />
+                {errors.existing_fillers && <p className="text-red-500 text-xs mt-1">{errors.existing_fillers.message}</p>}
+              </div>
+            )}
+
+            {renderStep(
+              5,
+              'Você possui alguma destas condições?',
+              watchAll.health_conditions?.join(', ') || '',
+              watchAll.health_conditions?.length > 0,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="health_conditions"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      options={[
+                        'Nenhuma das anteriores',
+                        'Diabetes',
+                        'Hipertensão',
+                        'Doença Autoimune',
+                        'Problemas de coagulação',
+                        'Problemas de tireoide',
+                        'Outra'
+                      ]}
+                      value={field.value || []}
+                      onChange={(val) => {
+    if (val.includes('Nenhuma das anteriores')) {
+      field.onChange(['Nenhuma das anteriores']);
+      handleNext(6);
+    } else {
+      field.onChange(val.filter(v => v !== 'Nenhuma das anteriores'));
+      if (!val.includes('Outra')) handleNext(6);
+    }
+  }}
+                    />
+                  )}
+                />
+                {errors.health_conditions && <p className="text-red-500 text-xs mt-1">{errors.health_conditions.message}</p>}
+                {watchAll.health_conditions?.includes('Outra') && (
+                  <div className="mt-4 flex items-end gap-2">
+    <div className="flex-1">
+      <Input 
+        placeholder="Qual condição?"
+        {...register('health_condition_other')}
+        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
+        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleNext(6))}
+      />
+    </div>
+    <button type="button" onClick={() => handleNext(6)} className="bg-clinic-gold text-white px-4 py-2.5 text-[10px] tracking-widest uppercase hover:bg-clinic-goldDark transition-colors flex-shrink-0">OK</button>
+  </div>
+                )}
+                
+              </div>
+            )}
+
+            {renderStep(
+              6,
+              'Faz uso de medicamentos de uso contínuo?',
+              watchAll.continuous_medication || '',
+              !!watchAll.continuous_medication,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="continuous_medication"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      type="radio"
+                      options={['Não', 'Sim']}
+                      value={field.value ? [field.value] : []}
+                      onChange={(val) => {
+    const selected = val[val.length - 1] || '';
+    field.onChange(selected);
+    if (selected === 'Não') handleNext(7);
+  }}
+                    />
+                  )}
+                />
+                {errors.continuous_medication && <p className="text-red-500 text-xs mt-1">{errors.continuous_medication.message}</p>}
+                {watchAll.continuous_medication === 'Sim' && (
+                  <div className="mt-4 flex items-end gap-2">
+    <div className="flex-1">
+      <Input 
+        placeholder="Quais medicamentos?"
+        {...register('continuous_medication_details')}
+        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
+        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleNext(7))}
+      />
+    </div>
+    <button type="button" onClick={() => handleNext(7)} className="bg-clinic-gold text-white px-4 py-2.5 text-[10px] tracking-widest uppercase hover:bg-clinic-goldDark transition-colors flex-shrink-0">OK</button>
+  </div>
+                )}
+                
+              </div>
+            )}
+
+            {renderStep(
+              7,
+              'Está grávida ou amamentando?',
+              watchAll.pregnancy_breastfeeding || '',
+              !!watchAll.pregnancy_breastfeeding,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="pregnancy_breastfeeding"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      type="radio"
+                      options={['Não', 'Sim, gestante', 'Sim, amamentando']}
+                      value={field.value ? [field.value] : []}
+                      onChange={(val) => {
+                        field.onChange(val[val.length - 1] || '');
+                        handleNext(8);
+                      }}
+                    />
+                  )}
+                />
+                {errors.pregnancy_breastfeeding && <p className="text-red-500 text-xs mt-1">{errors.pregnancy_breastfeeding.message}</p>}
+              </div>
+            )}
+
+            {renderStep(
+              8,
+              'Possui alguma alergia conhecida?',
+              watchAll.allergies || '',
+              !!watchAll.allergies,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="allergies"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      type="radio"
+                      options={['Não', 'Sim']}
+                      value={field.value ? [field.value] : []}
+                      onChange={(val) => {
+    const selected = val[val.length - 1] || '';
+    field.onChange(selected);
+    if (selected === 'Não') handleNext(9);
+  }}
+                    />
+                  )}
+                />
+                {errors.allergies && <p className="text-red-500 text-xs mt-1">{errors.allergies.message}</p>}
+                {watchAll.allergies === 'Sim' && (
+                  <div className="mt-4 flex items-end gap-2">
+    <div className="flex-1">
+      <Input 
+        placeholder="Alergia a quê?"
+        {...register('allergies_details')}
+        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
+        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleNext(9))}
+      />
+    </div>
+    <button type="button" onClick={() => handleNext(9)} className="bg-clinic-gold text-white px-4 py-2.5 text-[10px] tracking-widest uppercase hover:bg-clinic-goldDark transition-colors flex-shrink-0">OK</button>
+  </div>
+                )}
+                
+              </div>
+            )}
+
+            {renderStep(
+              9,
+              'Como você gostaria que fosse o resultado?',
+              watchAll.desired_result || '',
+              !!watchAll.desired_result,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="desired_result"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      type="radio"
+                      options={[
+                        'Natural e discreto',
+                        'Quero perceber bastante a mudança',
+                        'Ainda não sei, quero orientação profissional'
+                      ]}
+                      value={field.value ? [field.value] : []}
+                      onChange={(val) => {
+                        field.onChange(val[val.length - 1] || '');
+                        handleNext(10);
+                      }}
+                    />
+                  )}
+                />
+                {errors.desired_result && <p className="text-red-500 text-xs mt-1">{errors.desired_result.message}</p>}
+              </div>
+            )}
+
+            {renderStep(
+              10,
+              'O que você espera da sua avaliação?',
+              watchAll.consultation_expectation || '',
+              !!watchAll.consultation_expectation,
+              <div className="space-y-6">
+                <Controller
+                  control={control}
+                  name="consultation_expectation"
+                  render={({ field }) => (
+                    <CheckboxGroup 
+                      type="radio"
+                      options={[
+                        'Já sei o que quero fazer',
+                        'Quero saber qual procedimento é mais indicado',
+                        'Quero montar um plano de tratamento'
+                      ]}
+                      value={field.value ? [field.value] : []}
+                      onChange={(val) => {
+                        field.onChange(val[val.length - 1] || '');
+                        handleNext(11);
+                      }}
+                    />
+                  )}
+                />
+                {errors.consultation_expectation && <p className="text-red-500 text-xs mt-1">{errors.consultation_expectation.message}</p>}
+              </div>
+            )}
+
+            {renderStep(
+              11,
+              'Seus dados para contato',
+              watchAll.name ? watchAll.name : 'Dados Pessoais',
+              false,
+              <div className="space-y-8 mt-4">
+                
                 <div className="space-y-6">
-                  <h3 className="text-lg md:text-xl font-serif text-clinic-textPrimary leading-tight">Qual procedimento ou resultado você está buscando?</h3>
-                  <Controller
-                    control={control}
-                    name="desired_procedures"
-                    render={({ field }) => (
-                      <CheckboxGroup 
-                        options={[
-                          ...(selectedProcedure ? [selectedProcedure.title] : []),
-                          'Rejuvenescimento facial',
-                          'Botox',
-                          'Preenchimento',
-                          'Fios de PDO',
-                          'Bioestimulador de colágeno',
-                          'Tratamento da pele/manchas',
-                          'Micropigmentação',
-                          'Laser/despigmentação',
-                          'Ainda não sei, quero orientação'
-                        ]}
-                        value={field.value}
-                        onChange={(val) => {
-                          if (val.includes('Ainda não sei, quero orientação')) {
-                            field.onChange(['Ainda não sei, quero orientação']);
-                          } else {
-                            field.onChange(val.filter(v => v !== 'Ainda não sei, quero orientação'));
-                          }
-                        }}
-                      />
-                    )}
+                  <Input 
+                    placeholder="Nome completo"
+                    {...register('name')}
+                    error={errors.name?.message}
+                    className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
                   />
-                  {errors.desired_procedures && <p className="text-red-500 text-xs mt-1">{errors.desired_procedures.message}</p>}
+                  <Input 
+                    placeholder="WhatsApp (com DDD)"
+                    {...register('phone')}
+                    error={errors.phone?.message}
+                    className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
+                  />
+                  <div className="space-y-1">
+                    <Input 
+                      type="date"
+                      {...register('birthDate')}
+                      error={errors.birthDate?.message}
+                      className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors text-clinic-textSecondary font-light text-sm"
+                    />
+                    <p className="text-[10px] text-clinic-textSecondary/60 mt-1.5 uppercase tracking-wider font-light">Data de nascimento</p>
+                  </div>
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="text-lg md:text-xl font-serif text-clinic-textPrimary leading-tight">O que mais incomoda você atualmente?</h3>
+                <div className="space-y-4 pt-6">
+                  <label className="block text-clinic-textPrimary font-medium text-sm">Como você conheceu a Ferrer Innovare? (Opcional)</label>
                   <Controller
-                    control={control}
-                    name="main_concerns"
-                    render={({ field }) => (
-                      <CheckboxGroup 
-                        options={[
-                          'Rugas ou linhas de expressão',
-                          'Flacidez',
-                          'Falta de contorno facial',
-                          'Falta de volume',
-                          'Olheiras',
-                          'Manchas/pigmentação',
-                          'Assimetria',
-                          'Quero melhorar minha aparência de forma geral',
-                          'Outro'
-                        ]}
-                        value={field.value}
-                        onChange={(val) => {
-                          field.onChange(val);
-                        }}
+  control={control}
+  name="discovery_channel"
+  render={({ field }) => (
+    <div className="relative">
+      <button 
+        type="button"
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className="w-full bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border/60 rounded-none px-0 py-3 text-clinic-textPrimary text-sm font-light focus:outline-none focus:border-clinic-gold transition-colors flex justify-between items-center"
+      >
+        <span>{field.value || 'Selecione uma opção'}</span>
+        <svg className={`w-4 h-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M19 9l-7 7-7-7"></path></svg>
+      </button>
+      
+      <AnimatePresence>
+        {isDropdownOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+            
+            <motion.div 
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-full left-0 w-full mt-1 bg-[#FCFBF9] border border-clinic-border/40 z-50 shadow-sm max-h-60 overflow-y-auto"
+            >
+              {[
+                { label: 'Selecione uma opção', value: '' },
+                { label: 'Instagram', value: 'Instagram' },
+                { label: 'Facebook', value: 'Facebook' },
+                { label: 'Google', value: 'Google' },
+                { label: 'TikTok', value: 'TikTok' },
+                { label: 'WhatsApp', value: 'WhatsApp' },
+                { label: 'Indicação', value: 'Indicação' },
+                { label: 'Já sou cliente', value: 'Já sou cliente' },
+                { label: 'Outro', value: 'Outro' },
+              ].map((opt, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    field.onChange(opt.value);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm font-light border-b border-clinic-border/20 last:border-b-0 hover:text-clinic-gold transition-colors ${field.value === opt.value ? 'text-clinic-gold font-medium' : 'text-clinic-textPrimary'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  )}
+/>
+                  {watchAll.discovery_channel === 'Outro' && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4">
+                      <label className="block text-clinic-textPrimary font-medium mb-2 text-sm">Qual?</label>
+                      <Input
+                        {...register('discovery_channel_other')}
+                        placeholder="Ex: Vi na rua, Evento, etc..."
+                        className="w-full bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
                       />
-                    )}
-                  />
-                  {errors.main_concerns && <p className="text-red-500 text-xs mt-1">{errors.main_concerns.message}</p>}
-                  
-                  {watchAll.main_concerns.includes('Outro') && (
-                    <div className="mt-4">
-                      <Input 
-                        placeholder="Conte um pouco mais..."
-                        {...register('main_concerns_other')}
-                        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                      />
-                    </div>
+                    </motion.div>
                   )}
                 </div>
-              </motion.div>
-            )}
 
-            {/* ETAPA 2 */}
-            {currentStep === 2 && (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-12"
-              >
-                <div className="space-y-6">
-                  <h3 className="text-lg md:text-xl font-serif text-clinic-textPrimary leading-tight">Você já realizou algum procedimento estético?</h3>
-                  <Controller
-                    control={control}
-                    name="previous_procedures"
-                    render={({ field }) => (
-                      <CheckboxGroup 
-                        type="radio"
-                        options={[
-                          'Nunca',
-                          'Sim, recentemente',
-                          'Sim, há algum tempo'
-                        ]}
-                        value={field.value ? [field.value] : []}
-                        onChange={(val) => field.onChange(val[val.length - 1] || '')}
-                      />
-                    )}
-                  />
-                  {errors.previous_procedures && <p className="text-red-500 text-xs mt-1">{errors.previous_procedures.message}</p>}
-                  
-                  {(watchAll.previous_procedures === 'Sim, recentemente' || watchAll.previous_procedures === 'Sim, há algum tempo') && (
-                    <div className="mt-4">
-                      <Input 
-                        placeholder="Qual procedimento?"
-                        {...register('previous_procedures_details')}
-                        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-6">
-                  <h3 className="text-lg md:text-xl font-serif text-clinic-textPrimary leading-tight">Você possui algum preenchimento ou outro produto aplicado na região que deseja tratar?</h3>
-                  <Controller
-                    control={control}
-                    name="existing_fillers"
-                    render={({ field }) => (
-                      <CheckboxGroup 
-                        type="radio"
-                        options={[
-                          'Não',
-                          'Sim',
-                          'Não sei informar'
-                        ]}
-                        value={field.value ? [field.value] : []}
-                        onChange={(val) => field.onChange(val[val.length - 1] || '')}
-                      />
-                    )}
-                  />
-                  {errors.existing_fillers && <p className="text-red-500 text-xs mt-1">{errors.existing_fillers.message}</p>}
-                </div>
-              </motion.div>
-            )}
-
-            {/* ETAPA 3 */}
-            {currentStep === 3 && (
-              <motion.div
-                key="step3"
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-12"
-              >
-                <div className="space-y-10">
-                  <div className="space-y-6">
-                    <h3 className="text-lg md:text-xl font-serif text-clinic-textPrimary leading-tight">Você possui alguma destas condições?</h3>
-                    <Controller
-                      control={control}
-                      name="health_conditions"
-                      render={({ field }) => (
-                        <CheckboxGroup 
-                          options={[
-                            'Diabetes',
-                            'Pressão alta/hipertensão',
-                            'Doença autoimune',
-                            'Problema de coagulação',
-                            'Alergia importante',
-                            'Nenhuma das anteriores',
-                            'Outra'
-                          ]}
-                          value={field.value}
-                          onChange={(val) => {
-                            if (val.includes('Nenhuma das anteriores')) {
-                              field.onChange(['Nenhuma das anteriores']);
-                            } else {
-                              field.onChange(val.filter(v => v !== 'Nenhuma das anteriores'));
-                            }
-                          }}
-                        />
-                      )}
-                    />
-                    {errors.health_conditions && <p className="text-red-500 text-xs mt-1">{errors.health_conditions.message}</p>}
-                    
-                    {watchAll.health_conditions.includes('Outra') && (
-                      <div className="mt-4">
-                        <Input 
-                          placeholder="Qual condição?"
-                          {...register('health_condition_other')}
-                          className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-6">
-                    <p className="text-sm font-semibold text-clinic-textPrimary uppercase tracking-wider">Faz uso de medicamentos de uso contínuo?</p>
-                    <Controller
-                      control={control}
-                      name="continuous_medication"
-                      render={({ field }) => (
-                        <CheckboxGroup 
-                          type="radio"
-                          options={['Não', 'Sim']}
-                          value={field.value ? [field.value] : []}
-                          onChange={(val) => field.onChange(val[val.length - 1] || '')}
-                        />
-                      )}
-                    />
-                    {errors.continuous_medication && <p className="text-red-500 text-xs mt-1">{errors.continuous_medication.message}</p>}
-                    {watchAll.continuous_medication === 'Sim' && (
-                      <div className="mt-4">
-                        <Input 
-                          placeholder="Quais medicamentos?"
-                          {...register('continuous_medication_details')}
-                          className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-6">
-                    <p className="text-sm font-semibold text-clinic-textPrimary uppercase tracking-wider">Está grávida ou amamentando?</p>
-                    <Controller
-                      control={control}
-                      name="pregnancy_breastfeeding"
-                      render={({ field }) => (
-                        <CheckboxGroup 
-                          type="radio"
-                          options={['Não', 'Sim']}
-                          value={field.value ? [field.value] : []}
-                          onChange={(val) => field.onChange(val[val.length - 1] || '')}
-                        />
-                      )}
-                    />
-                    {errors.pregnancy_breastfeeding && <p className="text-red-500 text-xs mt-1">{errors.pregnancy_breastfeeding.message}</p>}
-                  </div>
-
-                  <div className="space-y-6">
-                    <p className="text-sm font-semibold text-clinic-textPrimary uppercase tracking-wider">Possui alguma alergia conhecida?</p>
-                    <Controller
-                      control={control}
-                      name="allergies"
-                      render={({ field }) => (
-                        <CheckboxGroup 
-                          type="radio"
-                          options={['Não', 'Sim']}
-                          value={field.value ? [field.value] : []}
-                          onChange={(val) => field.onChange(val[val.length - 1] || '')}
-                        />
-                      )}
-                    />
-                    {errors.allergies && <p className="text-red-500 text-xs mt-1">{errors.allergies.message}</p>}
-                    {watchAll.allergies === 'Sim' && (
-                      <div className="mt-4">
-                        <Input 
-                          placeholder="Qual?"
-                          {...register('allergies_details')}
-                          className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                </div>
-              </motion.div>
-            )}
-
-            {/* ETAPA 4 */}
-            {currentStep === 4 && (
-              <motion.div
-                key="step4"
-                initial={{ opacity: 0, x: 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-12"
-              >
-                <div className="space-y-6">
-                  <h3 className="text-lg md:text-xl font-serif text-clinic-textPrimary leading-tight">Como você gostaria que fosse o resultado?</h3>
-                  <Controller
-                    control={control}
-                    name="desired_result"
-                    render={({ field }) => (
-                      <CheckboxGroup 
-                        type="radio"
-                        options={[
-                          'Natural e discreto',
-                          'Quero perceber bastante a mudança',
-                          'Ainda não sei, quero orientação profissional'
-                        ]}
-                        value={field.value ? [field.value] : []}
-                        onChange={(val) => field.onChange(val[val.length - 1] || '')}
-                      />
-                    )}
-                  />
-                  {errors.desired_result && <p className="text-red-500 text-xs mt-1">{errors.desired_result.message}</p>}
-                </div>
-
-                <div className="space-y-6">
-                  <h3 className="text-lg md:text-xl font-serif text-clinic-textPrimary leading-tight">O que você espera da sua avaliação?</h3>
-                  <Controller
-                    control={control}
-                    name="consultation_expectation"
-                    render={({ field }) => (
-                      <CheckboxGroup 
-                        type="radio"
-                        options={[
-                          'Já sei o que quero fazer',
-                          'Quero saber qual procedimento é mais indicado',
-                          'Quero montar um plano de tratamento'
-                        ]}
-                        value={field.value ? [field.value] : []}
-                        onChange={(val) => field.onChange(val[val.length - 1] || '')}
-                      />
-                    )}
-                  />
-                  {errors.consultation_expectation && <p className="text-red-500 text-xs mt-1">{errors.consultation_expectation.message}</p>}
-                </div>
-
-                <div className="pt-12 border-t border-clinic-border/60 space-y-6">
-                  <div>
-                    <h3 className="text-xl font-serif text-clinic-textPrimary mb-1">Só falta uma coisa</h3>
-                    <p className="text-clinic-textSecondary text-xs tracking-wider uppercase font-light">Seus dados para contato</p>
-                  </div>
-                  
-                  <div className="space-y-5">
-                    <Input 
-                      placeholder="Nome completo"
-                      {...register('name')}
-                      error={errors.name?.message}
-                      className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                    />
-                    <Input 
-                      placeholder="WhatsApp (com DDD)"
-                      {...register('phone')}
-                      error={errors.phone?.message}
-                      className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                    />
-                    <div className="space-y-1">
-                      <Input 
-                        type="date"
-                        {...register('birthDate')}
-                        error={errors.birthDate?.message}
-                        className="bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors text-clinic-textSecondary font-light text-sm"
-                      />
-                      <p className="text-[10px] text-clinic-textSecondary/60 mt-1.5 uppercase tracking-wider font-light">Data de nascimento</p>
-                    </div>
-                  </div>
-
-                  {/* Como nos conheceu */}
-                  <div className="space-y-4 pt-6">
-                    <label className="block text-clinic-textPrimary font-medium text-sm">Como você conheceu a Ferrer Innovare? (Opcional)</label>
-                    <div className="relative">
-                      <select
-                        {...register('discovery_channel')}
-                        className="w-full bg-transparent border border-clinic-border/60 rounded-none px-4 py-3 text-clinic-textPrimary text-sm font-light focus:outline-none focus:border-clinic-gold transition-colors appearance-none"
-                      >
-                        <option value="">Selecione uma opção</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="Facebook">Facebook</option>
-                        <option value="Google">Google</option>
-                        <option value="TikTok">TikTok</option>
-                        <option value="WhatsApp">WhatsApp</option>
-                        <option value="Indicação">Indicação</option>
-                        <option value="Já sou cliente">Já sou cliente</option>
-                        <option value="Outro">Outro</option>
-                      </select>
-                    </div>
-                    {watchAll.discovery_channel === 'Outro' && (
-                      <div className="mt-4">
-                        <label className="block text-clinic-textPrimary font-medium mb-2 text-sm">Qual?</label>
-                        <Input
-                          {...register('discovery_channel_other')}
-                          placeholder="Ex: Vi na rua, Evento, etc..."
-                          className="w-full bg-transparent border-t-0 border-l-0 border-r-0 border-b border-clinic-border rounded-none px-0 py-2.5 focus:ring-0 focus:border-clinic-gold transition-colors placeholder:text-clinic-textSecondary/40 font-light text-sm"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-clinic-surface/30 p-6 border-l border-clinic-gold text-xs text-clinic-textSecondary leading-relaxed italic font-light mb-6">
+                <div className="bg-clinic-surface/30 p-6 border-l border-clinic-gold text-xs text-clinic-textSecondary leading-relaxed italic font-light my-8">
                   <strong>IMPORTANTE:</strong> Esta pré-consulta tem como objetivo conhecer melhor suas necessidades e realizar uma triagem inicial. As respostas não substituem a avaliação presencial. A indicação e realização de qualquer procedimento dependerão de avaliação individual, histórico clínico e critérios de segurança.
                 </div>
-              </motion.div>
+
+                <div className="pt-6 border-t border-clinic-border/60 flex justify-end">
+                  <Button
+                    type="submit"
+                    isLoading={isSubmitting}
+                    className="w-full sm:w-auto px-10 h-12 bg-clinic-gold hover:bg-clinic-goldDark text-white rounded-none uppercase tracking-widest text-[11px] transition-all duration-300"
+                  >
+                    Enviar pré-consulta
+                  </Button>
+                </div>
+              </div>
             )}
 
-          </AnimatePresence>
-
-          <div className="mt-16 flex items-center justify-between pt-6 border-t border-clinic-border/60">
-            {currentStep > 1 ? (
-              <button
-                type="button"
-                onClick={prevStep}
-                className="text-[10px] uppercase tracking-[0.2em] text-clinic-textSecondary hover:text-clinic-textPrimary transition-colors duration-300 font-semibold"
-              >
-                ← Voltar
-              </button>
-            ) : (
-              <div />
-            )}
-            
-            {currentStep < steps.length ? (
-              <Button
-                type="button"
-                onClick={nextStep}
-                className="px-10 h-12 bg-clinic-textPrimary hover:bg-clinic-goldDark text-white rounded-none uppercase tracking-widest text-[11px] transition-all duration-300"
-              >
-                Continuar
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                className="px-10 h-12 bg-clinic-gold hover:bg-clinic-goldDark text-white rounded-none uppercase tracking-widest text-[11px] transition-all duration-300"
-              >
-                Enviar pré-consulta
-              </Button>
-            )}
           </div>
         </form>
       </div>
