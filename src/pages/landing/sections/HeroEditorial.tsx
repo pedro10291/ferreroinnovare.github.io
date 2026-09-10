@@ -18,7 +18,7 @@ export const HeroEditorial = () => {
             {/* Extremely subtle editorial frame */}
             <div className="relative border border-clinic-border/40 p-2 lg:p-3 bg-white/40 shadow-sm">
               <img 
-                src="/dra-patricia.jpg" 
+                src={`${import.meta.env.BASE_URL}dra-patricia.jpg`} 
                 alt="Dra. Patricia Santana" 
                 className="w-full h-auto object-contain mx-auto"
                 loading="eager"

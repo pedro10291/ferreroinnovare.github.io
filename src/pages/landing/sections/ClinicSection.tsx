@@ -77,7 +77,7 @@ export const ClinicSection = () => {
               className="w-full flex justify-center"
             >
               <img 
-                src="/fotoequipe.jpg" 
+                src={`${import.meta.env.BASE_URL}fotoequipe.jpg`} 
                 alt="Equipe Ferrer Innovare Clinic" 
                 className="w-full h-auto object-contain"
                 loading="lazy"

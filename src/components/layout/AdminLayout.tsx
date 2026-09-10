@@ -48,7 +48,7 @@ export const AdminLayout = () => {
       {/* Desktop Sidebar */}
       <div className="w-64 bg-clinic-surface border-r border-clinic-border hidden md:flex flex-col fixed inset-y-0 z-10">
         <div className="h-16 flex items-center px-6 border-b border-clinic-border bg-clinic-surface shrink-0">
-          <img src="/logo.png" alt="Logo" className="h-10 object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="h-10 object-contain" />
           <span className="ml-3 font-serif text-clinic-gold font-medium">ClinicOS</span>
         </div>
         
@@ -79,7 +79,7 @@ export const AdminLayout = () => {
           <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-clinic-surface shadow-xl">
             <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-clinic-border">
               <div className="flex items-center">
-                <img src="/logo.png" alt="Logo" className="h-10 object-contain" />
+                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="h-10 object-contain" />
                 <span className="ml-3 font-serif text-clinic-gold font-medium">ClinicOS</span>
               </div>
               <button
@@ -118,7 +118,7 @@ export const AdminLayout = () => {
         {/* Mobile header */}
         <div className="md:hidden sticky top-0 z-10 h-16 bg-clinic-surface border-b border-clinic-border flex items-center justify-between px-4 shrink-0 shadow-sm">
           <div className="flex items-center">
-            <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="h-8 object-contain" />
             <span className="ml-3 font-serif text-clinic-gold font-medium">ClinicOS</span>
           </div>
           <button

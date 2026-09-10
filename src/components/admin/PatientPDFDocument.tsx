@@ -310,7 +310,7 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({
         
         {/* MARCA D'ÁGUA DE FUNDO (todas as páginas) */}
         <View style={styles.watermarkContainer} fixed>
-          <Image src="/logo.png" style={styles.watermarkImage} />
+          <Image src={`${import.meta.env.BASE_URL}logo.png`} style={styles.watermarkImage} />
         </View>
         
         {/* CABEÇALHO */}

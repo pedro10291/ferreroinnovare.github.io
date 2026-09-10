@@ -64,7 +64,7 @@ export const Login = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <img
           className="mx-auto h-16 w-auto"
-          src="/logo.png"
+          src={`${import.meta.env.BASE_URL}logo.png`}
           alt="Ferrer Innovare Clinic"
         />
         <h2 className="mt-6 text-center text-3xl font-serif text-clinic-textPrimary">
