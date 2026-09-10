@@ -27,7 +27,7 @@ const PrivacyPolicy = React.lazy(() => import('./pages/legal/PrivacyPolicy').the
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={import.meta.env.BASE_URL}>
       <Tracking />
       <React.Suspense fallback={
         <div className="h-screen w-screen flex items-center justify-center bg-clinic-bg">
