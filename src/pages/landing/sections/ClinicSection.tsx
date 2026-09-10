@@ -24,7 +24,7 @@ export const ClinicSection = () => {
         </motion.div>
 
         {/* Team List - Editorial Blocks */}
-        <div className="flex flex-col border-t border-clinic-border/30">
+        <div className="flex flex-col gap-16 md:gap-24 border-t border-b border-clinic-border/30 py-16 md:py-24">
           
           {/* Profissional 1 */}
           <motion.div 
@@ -32,7 +32,7 @@ export const ClinicSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
-            className="flex flex-col md:flex-row gap-3 md:gap-12 lg:gap-20 py-10 md:py-16 border-b border-clinic-border/30"
+            className="flex flex-col md:flex-row gap-3 md:gap-12 lg:gap-20"
           >
             <div className="w-full md:w-1/3">
               <h4 className="text-2xl md:text-3xl lg:text-4xl font-serif text-clinic-textPrimary mb-1 md:mb-0">Dra. Patricia Santana</h4>
@@ -53,7 +53,7 @@ export const ClinicSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.1 }}
-            className="flex flex-col md:flex-row gap-3 md:gap-12 lg:gap-20 py-10 md:py-16 border-b border-clinic-border/30"
+            className="flex flex-col md:flex-row gap-3 md:gap-12 lg:gap-20"
           >
             <div className="w-full md:w-1/3">
               <h4 className="text-2xl md:text-3xl lg:text-4xl font-serif text-clinic-textPrimary mb-1 md:mb-0">Shaiane Santos</h4>
@@ -74,7 +74,7 @@ export const ClinicSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="flex flex-col md:flex-row gap-3 md:gap-12 lg:gap-20 py-10 md:py-16 border-b border-clinic-border/30"
+            className="flex flex-col md:flex-row gap-3 md:gap-12 lg:gap-20"
           >
             <div className="w-full md:w-1/3">
               <h4 className="text-2xl md:text-3xl lg:text-4xl font-serif text-clinic-textPrimary mb-1 md:mb-0">Luana Paula</h4>
@@ -97,7 +97,7 @@ export const ClinicSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
-          className="w-full flex justify-center mt-20 md:mt-28 px-2 md:px-0"
+          className="w-full flex justify-center mt-16 md:mt-24 px-2 md:px-0"
         >
           <div className="w-full max-w-5xl relative">
             {/* Subtle editorial frame for the image */}
