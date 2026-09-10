@@ -11,6 +11,7 @@ import { Procedure } from '../../types/procedure';
 import { UNAVAILABLE_PROCEDURE_SLUGS } from '../../config/constants';
 import { getTrackingData } from '../../components/Tracking';
 import { generateProcedureBookingWhatsAppLink } from '../../utils/whatsapp';
+import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
 
 const requestSchema = z.object({
   // Etapa 1
@@ -122,6 +123,8 @@ export const AnamnesisForm = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const turnstileRef = React.useRef<TurnstileInstance>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const {
     register,
@@ -254,6 +257,11 @@ export const AnamnesisForm = () => {
 
 
   const onSubmit = async (data: RequestFormData) => {
+    if (!turnstileToken) {
+      alert('Aguarde a validação de segurança do sistema.');
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       const normalizedPhone = data.phone.replace(/\D/g, '');
@@ -350,17 +358,45 @@ export const AnamnesisForm = () => {
         clinical_data: clinicalData
       };
 
-      const { error } = await supabase
-        .from('contact_requests')
-        .insert([payload]);
-
-      if (error) throw error;
+      // Dispara POST para Edge Function validada por Turnstile
+      const functionPayload = {
+        turnstile_token: turnstileToken,
+        ...payload
+      };
+      
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://iktdzmigzmtgumqukutd.supabase.co';
+      const response = await fetch(`${supabaseUrl}/functions/v1/public-submit-contact-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(functionPayload)
+      });
+      
+      if (!response.ok) {
+        let errMessage = 'Falha ao processar solicitação';
+        try {
+          const errData = await response.json();
+          if (import.meta.env.DEV) {
+            // Em DEV, mostrar erro detalhado para facilitar debug
+            alert(`[DEV DEBUG] HTTP ${response.status}\nBody: ${JSON.stringify(errData, null, 2)}`);
+          }
+          if (errData.error) errMessage = errData.error;
+        } catch (e) {
+          if (import.meta.env.DEV) {
+             alert(`[DEV DEBUG] HTTP ${response.status}\nCould not parse JSON.`);
+          }
+        }
+        throw new Error(errMessage);
+      }
 
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Não foi possível enviar sua solicitação. Tente novamente mais tarde.');
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
+      alert(error.message || 'Não foi possível enviar sua solicitação. Tente novamente mais tarde.');
     } finally {
       setIsSubmitting(false);
     }
@@ -897,7 +933,17 @@ export const AnamnesisForm = () => {
                   <strong>IMPORTANTE:</strong> Esta pré-consulta tem como objetivo conhecer melhor suas necessidades e realizar uma triagem inicial. As respostas não substituem a avaliação presencial. A indicação e realização de qualquer procedimento dependerão de avaliação individual, histórico clínico e critérios de segurança.
                 </div>
 
-                <div className="pt-6 border-t border-clinic-border/60 flex justify-end">
+                  <div className="pt-6 border-t border-clinic-border/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex-shrink-0">
+                      <Turnstile
+                        ref={turnstileRef}
+                        siteKey={import.meta.env.DEV ? "1x00000000000000000000AA" : (import.meta.env.VITE_TURNSTILE_SITE_KEY || "")}
+                        onSuccess={(token) => setTurnstileToken(token)}
+                        onError={() => setTurnstileToken(null)}
+                        onExpire={() => setTurnstileToken(null)}
+                        options={{ theme: "light" }}
+                      />
+                    </div>
                   <Button
                     type="submit"
                     isLoading={isSubmitting}

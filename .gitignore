@@ -35,4 +35,4 @@ dist-ssr/
 tmp/
 temp/
 .scratch_guides/
-.gemini/
+/supabase/.temp/ 

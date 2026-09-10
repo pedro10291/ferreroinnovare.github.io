@@ -25,25 +25,45 @@ export const ClinicSection = () => {
                 </span>
               </div>
               
-              {/* c) NOSSA ABORDAGEM */}
-              <h3 className="text-2xl md:text-3xl font-serif text-clinic-textPrimary mb-8 md:mb-10 leading-[1.15]">
-                NOSSA ABORDAGEM
+              {/* c) NOSSA EQUIPE */}
+              <h3 className="text-2xl md:text-3xl font-serif text-clinic-textPrimary mb-10 leading-[1.15]">
+                Nossa Equipe
               </h3>
               
-              {/* d) Texto Institucional */}
-              <div className="space-y-6">
-                <p className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">
-                  <strong className="font-serif italic font-normal text-[17px] sm:text-[19px] md:text-xl text-clinic-textPrimary">A Ferrer Innovare Clinic</strong> é uma clínica dedicada à estética e ao rejuvenescimento, com uma abordagem baseada em avaliação individual, planejamento e personalização dos tratamentos.
-                </p>
-                <p className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">
-                  Entendemos que cada pessoa possui características únicas. Por isso, não trabalhamos com protocolos padronizados: cada indicação é pensada de acordo com a necessidade, anatomia e objetivo de cada paciente.
-                </p>
-                <p className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">
-                  Nossa filosofia une conhecimento técnico, atualização profissional, tecnologias selecionadas e olhar estético, buscando resultados equilibrados, naturais e coerentes com cada indivíduo.
-                </p>
-                <p className="text-[15px] sm:text-[17px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">
-                  <span className="font-medium text-clinic-textPrimary/80">Aqui, cada detalhe importa da avaliação ao acompanhamento.</span>
-                </p>
+              {/* d) Team List */}
+              <div className="space-y-10">
+                {/* Profissional 1 */}
+                <div>
+                  <h4 className="text-xl md:text-2xl font-serif text-clinic-textPrimary mb-1">Dra. Patricia Santana</h4>
+                  <p className="text-[11px] md:text-xs font-sans text-clinic-goldDark/90 uppercase tracking-widest mb-3 leading-relaxed">
+                    Biomédica | Estética Avançada | Patologia Clínica e Análises Clínicas | Perita Judicial
+                  </p>
+                  <p className="text-[15px] sm:text-[16px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">
+                    Bacharel em Biomedicina, graduada em Estética e Cosmetologia, com pós-graduação e residência em Estética Avançada, além de formação em Patologia Clínica e Análises Clínicas e Perícia Judicial.
+                  </p>
+                </div>
+
+                {/* Profissional 2 */}
+                <div>
+                  <h4 className="text-xl md:text-2xl font-serif text-clinic-textPrimary mb-1">Shaiane Santos</h4>
+                  <p className="text-[11px] md:text-xs font-sans text-clinic-goldDark/90 uppercase tracking-widest mb-3 leading-relaxed">
+                    Esteticista | Graduanda em Fisioterapia
+                  </p>
+                  <p className="text-[15px] sm:text-[16px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">
+                    Especialista em Limpeza de Pele e Estética Tradicional, com diversos cursos de aperfeiçoamento na área da estética.
+                  </p>
+                </div>
+
+                {/* Profissional 3 */}
+                <div>
+                  <h4 className="text-xl md:text-2xl font-serif text-clinic-textPrimary mb-1">Luana Paula</h4>
+                  <p className="text-[11px] md:text-xs font-sans text-clinic-goldDark/90 uppercase tracking-widest mb-3 leading-relaxed">
+                    Especialista em Dermomicropigmentação | Graduanda em Nutrição
+                  </p>
+                  <p className="text-[15px] sm:text-[16px] md:text-lg text-clinic-textSecondary font-light leading-[1.8]">
+                    Mais de 10 anos de experiência e dedicação à beleza e à estética, com especialização em Dermomicropigmentação.
+                  </p>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -72,13 +92,13 @@ export const ClinicSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
-          className="mt-6 md:mt-12 text-center max-w-3xl mx-auto flex flex-col items-center"
+          className="mt-16 md:mt-24 text-center max-w-3xl mx-auto flex flex-col items-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-clinic-textPrimary italic mb-4 md:mb-5">
             Ferrer Innovare Clinic
           </h2>
-          <p className="text-[10px] sm:text-xs md:text-sm text-clinic-goldDark font-medium tracking-[0.2em] uppercase leading-[1.8]">
-            Estética com propósito,<br className="sm:hidden" /> planejamento e responsabilidade.
+          <p className="text-[14px] sm:text-[15px] md:text-base text-clinic-textSecondary font-light leading-[1.8] max-w-2xl px-4">
+            Uma equipe qualificada, em constante aperfeiçoamento e comprometida com um atendimento seguro, personalizado e de excelência.
           </p>
         </motion.div>
 
