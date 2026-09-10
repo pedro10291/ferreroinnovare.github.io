@@ -2,6 +2,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const allowedOrigins = [
+  'https://ferreroinnovare-github-io.vercel.app',
+  'https://pedro10291.github.io',
   'https://ferreroinnovare.github.io',
   'http://localhost:3000',
   'http://localhost:3001',
@@ -11,10 +13,10 @@ const allowedOrigins = [
 serve(async (req) => {
   const origin = req.headers.get('Origin')
   const isAllowedOrigin = origin && allowedOrigins.includes(origin)
-  const corsOrigin = isAllowedOrigin ? origin : 'https://ferreroinnovare.github.io'
+  const corsOrigin = isAllowedOrigin ? origin : 'https://ferreroinnovare-github-io.vercel.app'
 
   const corsHeaders = {
-    'Access-Control-Allow-Origin': corsOrigin || 'https://ferreroinnovare.github.io',
+    'Access-Control-Allow-Origin': corsOrigin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Vary': 'Origin',
