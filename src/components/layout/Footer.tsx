@@ -30,13 +30,9 @@ export const Footer = () => {
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <Link to="/" className="inline-block mb-4">
               <img
-                src="/logo-ferrer-compact.png"
+                src={`${import.meta.env.BASE_URL}logo.png`}
                 alt="Ferrer Innovare Clinic"
                 className="w-[132px] md:w-[150px] h-auto object-contain"
-                onError={(event) => {
-                  const image = event.target as HTMLImageElement;
-                  image.src = '/logo.png';
-                }}
               />
             </Link>
             <p className="text-clinic-textSecondary font-light text-xs leading-relaxed max-w-[260px]">

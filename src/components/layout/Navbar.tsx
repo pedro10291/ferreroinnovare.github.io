@@ -53,18 +53,9 @@ export const Navbar = () => {
           <div className="flex items-center gap-10 lg:gap-16">
             <Link to="/" className="flex items-center w-[120px] md:w-[220px] shrink-0 transition-opacity duration-300 hover:opacity-90">
               <img 
-                src="/logo-ferrer-compact.png" 
+                src={`${import.meta.env.BASE_URL}logo.png`}
                 alt="Ferrer Innovare Clinic" 
                 className="w-full h-auto object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  if (target.src.includes('logo-ferrer-compact.png')) {
-                    target.src = '/logo.png'; // fallback for existing logo
-                  } else {
-                    target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
-                  }
-                }}
               />
               <span className="hidden font-serif text-2xl font-medium tracking-wide text-clinic-textPrimary">
                 Ferrer Innovare Clinic
