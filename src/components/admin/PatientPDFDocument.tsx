@@ -231,8 +231,8 @@ const styles = StyleSheet.create({
   },
   tableCellDate: { width: '15%', fontSize: 9, color: '#666666' },
   tableCellProc: { width: '30%', fontSize: 9, color: '#2C363F', fontWeight: 'bold' },
-  tableCellProf: { width: '20%', fontSize: 9, color: '#666666' },
-  tableCellObs: { width: '35%', fontSize: 9, color: '#2C363F', lineHeight: 1.4 },
+  tableCellProf: { width: '25%', fontSize: 9, color: '#666666' },
+  tableCellObs: { width: '30%', fontSize: 9, color: '#2C363F', lineHeight: 1.4 },
   
   footer: {
     position: 'absolute',
@@ -268,6 +268,31 @@ const Block = ({ label, value, fullWidth = false }: { label: string, value: stri
       <Text style={styles.blockValue}>{value}</Text>
     </View>
   );
+};
+
+const getProfessionalName = (record: PatientRecord, appointments: Appointment[]) => {
+  if (record.appointment_id && appointments && appointments.length > 0) {
+    const appt = appointments.find(a => a.id === record.appointment_id);
+    if (appt) {
+      if ((appt as any).profiles?.full_name) {
+        return (appt as any).profiles.full_name;
+      }
+      if ((appt as any).professional?.full_name) {
+        return (appt as any).professional.full_name;
+      }
+    }
+  }
+  
+  if (!record.professional_name || record.professional_name.trim() === '') {
+    return 'Não informado';
+  }
+  
+  const lowered = record.professional_name.toLowerCase();
+  if (lowered.includes('admin') || lowered.includes('teste')) {
+    return 'Não informado';
+  }
+  
+  return record.professional_name;
 };
 
 export const PatientPDFDocument: React.FC<PatientPDFProps> = ({ 
@@ -380,19 +405,39 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({
 
         {/* 6. HISTÓRICO DE ATENDIMENTOS */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Histórico de Atendimentos</Text>
+          <Text style={styles.sectionTitle} minPresenceAhead={100}>Histórico de Atendimentos</Text>
           
           {records.length > 0 ? (
             <View style={styles.table}>
-              <View style={styles.tableHeaderRow} fixed>
-                <Text style={[styles.tableHeaderCell, { width: '15%' }]}>Data</Text>
-                <Text style={[styles.tableHeaderCell, { width: '30%' }]}>Procedimento</Text>
-                <Text style={[styles.tableHeaderCell, { width: '20%' }]}>Profissional</Text>
-                <Text style={[styles.tableHeaderCell, { width: '35%' }]}>Observações</Text>
+              {/* Agrupa cabeçalho e a primeira linha para nunca ficarem órfãos */}
+              <View wrap={false}>
+                <View style={styles.tableHeaderRow} fixed>
+                  <Text style={[styles.tableHeaderCell, { width: '15%' }]}>Data</Text>
+                  <Text style={[styles.tableHeaderCell, { width: '30%' }]}>Procedimento</Text>
+                  <Text style={[styles.tableHeaderCell, { width: '25%' }]}>Profissional</Text>
+                  <Text style={[styles.tableHeaderCell, { width: '30%' }]}>Observações</Text>
+                </View>
+                
+                {/* PRIMEIRA LINHA */}
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellDate}>
+                    {new Date(records[0].record_date).toLocaleDateString('pt-BR')}
+                  </Text>
+                  <Text style={styles.tableCellProc}>
+                    {records[0].procedure_name || 'Atendimento Geral'}
+                  </Text>
+                  <Text style={styles.tableCellProf}>
+                    {getProfessionalName(records[0], appointments)}
+                  </Text>
+                  <Text style={styles.tableCellObs}>
+                    {records[0].evolution_notes || '-'}
+                  </Text>
+                </View>
               </View>
-              
-              {records.map(record => (
-                <View key={record.id} style={styles.tableRow}>
+
+              {/* DEMAIS LINHAS */}
+              {records.slice(1).map(record => (
+                <View key={record.id} style={styles.tableRow} wrap={false}>
                   <Text style={styles.tableCellDate}>
                     {new Date(record.record_date).toLocaleDateString('pt-BR')}
                   </Text>
@@ -400,7 +445,7 @@ export const PatientPDFDocument: React.FC<PatientPDFProps> = ({
                     {record.procedure_name || 'Atendimento Geral'}
                   </Text>
                   <Text style={styles.tableCellProf}>
-                    {record.professional_name || '-'}
+                    {getProfessionalName(record, appointments)}
                   </Text>
                   <Text style={styles.tableCellObs}>
                     {record.evolution_notes || '-'}
