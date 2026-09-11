@@ -44,7 +44,7 @@ export const LocationSection = () => {
                 Google Maps
               </a>
               <a 
-                href="https://waze.com/ul?q=Rua%20Professor%20Irineu%20Claruppe,%2095,%20Itapevi" 
+                href="https://waze.com/ul?q=Rua%20Professor%20Irineu%20Chaluppe,%2095,%20Itapevi" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center h-12 px-6 border border-clinic-border bg-clinic-bg text-clinic-textPrimary text-[10px] font-semibold tracking-widest uppercase transition-colors hover:bg-[#EFE8E2]"
