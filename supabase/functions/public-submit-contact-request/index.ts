@@ -13,13 +13,15 @@ const allowedOrigins = [
 serve(async (req) => {
   const origin = req.headers.get('Origin')
   const isAllowedOrigin = origin && allowedOrigins.includes(origin)
-  const corsOrigin = isAllowedOrigin ? origin : 'https://ferreroinnovare-github-io.vercel.app'
 
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': corsOrigin,
+  const corsHeaders: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Vary': 'Origin',
+  }
+  
+  if (isAllowedOrigin) {
+    corsHeaders['Access-Control-Allow-Origin'] = origin
   }
   // CORS Preflight
   if (req.method === 'OPTIONS') {
@@ -91,9 +93,15 @@ serve(async (req) => {
     }
     
     // Validação estrita de Hostname (DEV vs PROD)
-    const expectedHostname = isDev ? 'localhost' : 'ferreroinnovare.github.io';
-    if (cfOutcome.hostname !== expectedHostname) {
-       console.log('Turnstile Hostname Mismatch:', cfOutcome.hostname, 'expected:', expectedHostname)
+    const expectedHostnames = [
+      'localhost',
+      'ferreroinnovare-github-io.vercel.app',
+      'pedro10291.github.io',
+      'ferreroinnovare.github.io'
+    ];
+    
+    if (!isDev && !expectedHostnames.includes(cfOutcome.hostname)) {
+       console.log('Turnstile Hostname Mismatch:', cfOutcome.hostname)
        return new Response(JSON.stringify({ error: 'Invalid hostname origin' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
