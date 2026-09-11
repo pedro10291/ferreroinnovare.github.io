@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export const ClinicSection = () => {
   return (
-    <section className="bg-clinic-surface pt-24 pb-24 md:pt-32 md:pb-32 border-t border-clinic-border/40">
+    <section className="bg-clinic-surface pt-12 pb-24 md:pt-32 md:pb-32 border-t border-clinic-border/40">
       <div className="max-w-[1200px] w-full mx-auto px-5 sm:px-8 lg:px-12">
         
         {/* Header: Institucional & Title */}
@@ -12,10 +12,10 @@ export const ClinicSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="flex flex-col items-center text-center mb-16 md:mb-24"
+          className="flex flex-col items-center text-center mb-12 md:mb-24"
         >
-          <span className="w-px h-12 bg-clinic-goldDark/30 block mb-6"></span>
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-clinic-goldDark font-semibold block mb-4">
+          <span className="w-px h-6 md:h-12 bg-clinic-goldDark/30 block mb-4 md:mb-6"></span>
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-clinic-goldDark font-semibold block mb-3 md:mb-4">
             Institucional
           </span>
           <h3 className="text-3xl md:text-4xl lg:text-5xl font-serif text-clinic-textPrimary leading-tight">
