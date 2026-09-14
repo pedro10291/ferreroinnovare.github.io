@@ -14,44 +14,45 @@ const loginSchema = z.object({
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
 });
 
+const forgotSchema = z.object({
+  email: z.string().email('E-mail inválido'),
+});
+
+const resetSchema = z.object({
+  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
+  confirmPassword: z.string().min(6, 'A confirmação de senha é obrigatória'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword'],
+});
+
 type LoginFormData = z.infer<typeof loginSchema>;
+type ForgotFormData = z.infer<typeof forgotSchema>;
+type ResetFormData = z.infer<typeof resetSchema>;
 
 export const Login = () => {
   const navigate = useNavigate();
   const { user, isLoading: isAuthLoading } = useAuth();
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [view, setView] = useState<'login' | 'forgot' | 'reset'>('login');
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
-
-  // State for forgot password and new password reset
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  
+  const [viewMode, setViewMode] = useState<'login' | 'forgot'>('login');
+  const [isRecovery, setIsRecovery] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      const search = window.location.search;
+      return hash.includes('type=recovery') || search.includes('type=recovery');
+    }
+    return false;
   });
 
-  useEffect(() => {
-    // Check if arriving via a password recovery link
-    const hash = window.location.hash;
-    const search = window.location.search;
-    if (hash.includes('type=recovery') || search.includes('type=recovery')) {
-      setIsRecoveryMode(true);
-      setView('reset');
-    }
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
-        setIsRecoveryMode(true);
-        setView('reset');
+        setIsRecovery(true);
       }
     });
 
@@ -60,10 +61,21 @@ export const Login = () => {
     };
   }, []);
 
-  const onSubmitLogin = async (data: LoginFormData) => {
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const forgotForm = useForm<ForgotFormData>({
+    resolver: zodResolver(forgotSchema),
+  });
+
+  const resetForm = useForm<ResetFormData>({
+    resolver: zodResolver(resetSchema),
+  });
+
+  const onLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError('');
-    setSuccessMessage('');
     
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,
@@ -78,66 +90,41 @@ export const Login = () => {
     }
   };
 
-  const handleForgotSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const emailToReset = forgotEmail.trim();
-    if (!emailToReset || !emailToReset.includes('@')) {
-      setError('Informe um e-mail válido');
-      return;
-    }
-
+  const onForgotSubmit = async (data: ForgotFormData) => {
     setIsLoading(true);
     setError('');
-    setSuccessMessage('');
+    
+    const baseUrl = import.meta.env.BASE_URL.endsWith('/')
+      ? import.meta.env.BASE_URL
+      : `${import.meta.env.BASE_URL}/`;
+    const redirectTo = `${window.location.origin}${baseUrl}painel/login`;
 
     try {
-      await supabase.auth.resetPasswordForEmail(emailToReset, {
-        redirectTo: `${window.location.origin}/painel/login`,
+      await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo,
       });
-      setSuccessMessage(
-        'Se o e-mail estiver cadastrado no sistema, você receberá as instruções para redefinição de senha.'
-      );
-    } catch {
-      setSuccessMessage(
-        'Se o e-mail estiver cadastrado no sistema, você receberá as instruções para redefinição de senha.'
-      );
+    } catch (err) {
+      console.error('Erro na redefinição de senha:', err);
     } finally {
       setIsLoading(false);
+      setForgotSuccess(true);
     }
   };
 
-  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword.length < 6) {
-      setError('A nova senha deve ter no mínimo 6 caracteres');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError('As senhas não coincidem');
-      return;
-    }
-
+  const onResetSubmit = async (data: ResetFormData) => {
     setIsLoading(true);
     setError('');
-    setSuccessMessage('');
 
     const { error } = await supabase.auth.updateUser({
-      password: newPassword,
+      password: data.password,
     });
 
     if (error) {
-      setError(error.message || 'Não foi possível redefinir a senha. Tente novamente.');
+      setError('Não foi possível atualizar a senha. O link pode ter expirado.');
       setIsLoading(false);
     } else {
-      setSuccessMessage('Senha alterada com sucesso! Redirecionando para o painel...');
       setIsLoading(false);
-      setTimeout(() => {
-        setIsRecoveryMode(false);
-        if (window.history.replaceState) {
-          window.history.replaceState(null, '', window.location.pathname);
-        }
-        navigate('/painel');
-      }, 1500);
+      setResetSuccess(true);
     }
   };
 
@@ -149,7 +136,7 @@ export const Login = () => {
     );
   }
 
-  if (user && !isRecoveryMode) {
+  if (user && !isRecovery) {
     return <Navigate to="/painel" replace />;
   }
 
@@ -162,124 +149,160 @@ export const Login = () => {
           alt="Ferrer Innovare Clinic"
         />
         <h2 className="mt-6 text-center text-3xl font-serif text-clinic-textPrimary">
-          {view === 'reset' ? 'Nova Senha' : 'Acesso Restrito'}
+          {isRecovery
+            ? 'Redefinir Senha'
+            : viewMode === 'forgot'
+            ? 'Recuperar Senha'
+            : 'Acesso Restrito'}
         </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="px-4 py-8 sm:px-10">
           <CardContent>
-            {error && (
-              <div className="bg-clinic-danger/10 text-clinic-danger p-3 rounded-md text-sm text-center mb-6">
-                {error}
-              </div>
-            )}
+            {/* MODO REDEFINIR SENHA (Link recebido por e-mail) */}
+            {isRecovery ? (
+              resetSuccess ? (
+                <div className="space-y-6 text-center">
+                  <div className="bg-emerald-50 text-emerald-800 p-4 rounded-md text-sm border border-emerald-200">
+                    Sua senha foi atualizada com sucesso!
+                  </div>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    onClick={() => {
+                      setIsRecovery(false);
+                      navigate('/painel');
+                    }}
+                  >
+                    Acessar o Painel
+                  </Button>
+                </div>
+              ) : (
+                <form className="space-y-6" onSubmit={resetForm.handleSubmit(onResetSubmit)}>
+                  <p className="text-xs text-clinic-textSecondary text-center leading-relaxed">
+                    Digite sua nova senha de acesso abaixo.
+                  </p>
 
-            {successMessage && (
-              <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-md text-sm text-center mb-6">
-                {successMessage}
-              </div>
-            )}
+                  {error && (
+                    <div className="bg-clinic-danger/10 text-clinic-danger p-3 rounded-md text-sm text-center">
+                      {error}
+                    </div>
+                  )}
 
-            {view === 'login' && (
-              <form className="space-y-6" onSubmit={handleSubmit(onSubmitLogin)}>
-                <Input
-                  label="E-mail"
-                  type="email"
-                  {...register('email')}
-                  error={errors.email?.message}
-                />
-                
-                <div>
                   <Input
-                    label="Senha"
+                    label="Nova Senha"
                     type="password"
-                    {...register('password')}
-                    error={errors.password?.message}
+                    {...resetForm.register('password')}
+                    error={resetForm.formState.errors.password?.message}
                   />
-                  <div className="mt-2 text-right">
+
+                  <Input
+                    label="Confirmar Nova Senha"
+                    type="password"
+                    {...resetForm.register('confirmPassword')}
+                    error={resetForm.formState.errors.confirmPassword?.message}
+                  />
+
+                  <Button type="submit" className="w-full" isLoading={isLoading}>
+                    Salvar Nova Senha
+                  </Button>
+                </form>
+              )
+            ) : viewMode === 'forgot' ? (
+              /* MODO ESQUECI MINHA SENHA (Solicitar e-mail) */
+              forgotSuccess ? (
+                <div className="space-y-6 text-center">
+                  <div className="bg-clinic-bg text-clinic-textPrimary p-4 rounded-md text-sm border border-clinic-border leading-relaxed">
+                    Se o e-mail estiver cadastrado em nosso sistema, você receberá uma mensagem com as instruções para redefinição de senha.
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => {
+                      setViewMode('login');
+                      setForgotSuccess(false);
+                    }}
+                  >
+                    Voltar ao Login
+                  </Button>
+                </div>
+              ) : (
+                <form className="space-y-6" onSubmit={forgotForm.handleSubmit(onForgotSubmit)}>
+                  <p className="text-xs text-clinic-textSecondary text-center leading-relaxed">
+                    Informe seu e-mail cadastrado para receber o link de recuperação.
+                  </p>
+
+                  {error && (
+                    <div className="bg-clinic-danger/10 text-clinic-danger p-3 rounded-md text-sm text-center">
+                      {error}
+                    </div>
+                  )}
+
+                  <Input
+                    label="E-mail"
+                    type="email"
+                    {...forgotForm.register('email')}
+                    error={forgotForm.formState.errors.email?.message}
+                  />
+
+                  <Button type="submit" className="w-full" isLoading={isLoading}>
+                    Enviar Instruções
+                  </Button>
+
+                  <div className="text-center pt-2">
                     <button
                       type="button"
                       onClick={() => {
+                        setViewMode('login');
                         setError('');
-                        setSuccessMessage('');
-                        setForgotEmail(getValues('email') || '');
-                        setView('forgot');
                       }}
-                      className="text-xs text-clinic-textSecondary hover:text-clinic-gold transition-colors focus:outline-none"
+                      className="text-xs text-clinic-textSecondary hover:text-clinic-gold transition-colors font-medium underline underline-offset-4"
                     >
-                      Esqueci minha senha
+                      Voltar ao Login
                     </button>
                   </div>
+                </form>
+              )
+            ) : (
+              /* MODO LOGIN NORMAL */
+              <form className="space-y-6" onSubmit={loginForm.handleSubmit(onLoginSubmit)}>
+                {error && (
+                  <div className="bg-clinic-danger/10 text-clinic-danger p-3 rounded-md text-sm text-center">
+                    {error}
+                  </div>
+                )}
+                
+                <Input
+                  label="E-mail"
+                  type="email"
+                  {...loginForm.register('email')}
+                  error={loginForm.formState.errors.email?.message}
+                />
+                
+                <Input
+                  label="Senha"
+                  type="password"
+                  {...loginForm.register('password')}
+                  error={loginForm.formState.errors.password?.message}
+                />
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setViewMode('forgot');
+                      setError('');
+                    }}
+                    className="text-xs text-clinic-textSecondary hover:text-clinic-gold transition-colors font-medium underline underline-offset-4"
+                  >
+                    Esqueci minha senha
+                  </button>
                 </div>
 
                 <Button type="submit" className="w-full" isLoading={isLoading}>
                   Entrar
-                </Button>
-              </form>
-            )}
-
-            {view === 'forgot' && (
-              <form className="space-y-6" onSubmit={handleForgotSubmit}>
-                <p className="text-sm text-clinic-textSecondary text-center mb-2">
-                  Digite seu e-mail para receber o link de redefinição de senha.
-                </p>
-
-                <Input
-                  label="E-mail registrado"
-                  type="email"
-                  value={forgotEmail}
-                  onChange={(e) => setForgotEmail(e.target.value)}
-                  placeholder="admin@exemplo.com"
-                  required
-                />
-
-                <Button type="submit" className="w-full" isLoading={isLoading}>
-                  Enviar e-mail de recuperação
-                </Button>
-
-                <div className="text-center pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setError('');
-                      setSuccessMessage('');
-                      setView('login');
-                    }}
-                    className="text-xs text-clinic-textSecondary hover:text-clinic-gold transition-colors focus:outline-none"
-                  >
-                    Voltar ao login
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {view === 'reset' && (
-              <form className="space-y-6" onSubmit={handleResetPasswordSubmit}>
-                <p className="text-sm text-clinic-textSecondary text-center mb-2">
-                  Digite a sua nova senha de acesso.
-                </p>
-
-                <Input
-                  label="Nova Senha"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
-
-                <Input
-                  label="Confirmar Nova Senha"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
-
-                <Button type="submit" className="w-full" isLoading={isLoading}>
-                  Salvar nova senha
                 </Button>
               </form>
             )}
@@ -291,3 +314,4 @@ export const Login = () => {
 };
 
 export default Login;
+
