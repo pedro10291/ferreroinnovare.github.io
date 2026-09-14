@@ -2,6 +2,10 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const allowedOrigins = [
+  'https://www.ferrerinnovare.com.br',
+  'https://ferrerinnovare.com.br',
+  'http://www.ferrerinnovare.com.br',
+  'http://ferrerinnovare.com.br',
   'https://ferreroinnovare-github-io.vercel.app',
   'https://pedro10291.github.io',
   'https://ferreroinnovare.github.io',
@@ -66,18 +70,21 @@ serve(async (req) => {
       throw new Error('Server configuration error')
     }
 
-    const formData = new FormData()
-    formData.append('secret', turnstileSecret)
-    formData.append('response', turnstile_token)
-    
     const clientIp = req.headers.get('cf-connecting-ip')
+    const verifyPayload: Record<string, string> = {
+      secret: turnstileSecret,
+      response: turnstile_token,
+    }
     if (clientIp) {
-      formData.append('remoteip', clientIp)
+      verifyPayload.remoteip = clientIp
     }
 
     const cfResult = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(verifyPayload),
     })
 
     const cfOutcome = await cfResult.json()
@@ -95,6 +102,8 @@ serve(async (req) => {
     // Validação estrita de Hostname (DEV vs PROD)
     const expectedHostnames = [
       'localhost',
+      'www.ferrerinnovare.com.br',
+      'ferrerinnovare.com.br',
       'ferreroinnovare-github-io.vercel.app',
       'pedro10291.github.io',
       'ferreroinnovare.github.io'

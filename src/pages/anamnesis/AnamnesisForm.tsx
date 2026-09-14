@@ -233,12 +233,22 @@ export const AnamnesisForm = () => {
     const fetchSelectedProcedure = async () => {
       if (!procedureSlug || UNAVAILABLE_PROCEDURE_SLUGS.includes(procedureSlug as typeof UNAVAILABLE_PROCEDURE_SLUGS[number])) return;
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('procedures')
         .select('*')
         .eq('slug', procedureSlug)
         .eq('active', true)
         .maybeSingle();
+
+      if (!data && !error) {
+        const { data: titleData } = await supabase
+          .from('procedures')
+          .select('*')
+          .ilike('title', `%${procedureSlug}%`)
+          .eq('active', true)
+          .maybeSingle();
+        data = titleData;
+      }
 
       if (error) {
         console.error('Não foi possível recuperar o procedimento selecionado:', error);
@@ -249,6 +259,7 @@ export const AnamnesisForm = () => {
         const procedure = data as Procedure;
         setSelectedProcedure(procedure);
         setValue('desired_procedures', [procedure.title], { shouldValidate: true });
+        setActiveStep(2);
       }
     };
 
